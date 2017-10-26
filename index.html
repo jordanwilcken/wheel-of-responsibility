@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>JS Bin</title>
+  <title>Wheel of Responsibility</title>
 
   <link rel="stylesheet" href="css.css" />
 </head>
@@ -15,8 +15,11 @@
   <script src="js.js"></script>
 
   <script>
-      var elmApp = Elm.Main.embed(
-          document.getElementById("elm-container"));
+        var elmApp = Elm.Main.embed(document.getElementById("elm-container"));
+
+        setInterval(function() {
+            elmApp.ports.timeNow.send(Date.now());
+        }, 1000);
   </script>
 </body>
 </html>

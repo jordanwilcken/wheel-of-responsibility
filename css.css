@@ -1,3 +1,15 @@
 #outer-circle {
   border: 1px Solid Black;
 }
+
+main {
+  margin: auto;
+  width: 900px;
+}
+
+svg {
+  display: block;
+  height: 800px;
+  margin: auto;
+  width: 800px;
+}
