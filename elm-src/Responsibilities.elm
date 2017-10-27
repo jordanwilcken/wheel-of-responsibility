@@ -10,14 +10,109 @@ module Responsibilities
 
 import Json.Encode as Encode
 import Svg exposing (..)
+import Svg.Attributes exposing (..)
 import Time
 
 
-view : Responsibilities -> Svg.Svg Never
-view (Responsibilities record) =
-    svg []
-        [ text "Hello again, world!"
+type alias SvgConfig =
+    { width : Int
+    , height : Int
+    }
+
+
+view : SvgConfig -> Responsibilities -> Svg.Svg Never
+view svgConfig (Responsibilities record) =
+    let
+        personX =
+            50
+
+        responsibilityX =
+            150
+
+        peopleCount =
+            List.length <| peopleToList record.responsiblePeople
+
+        responsibilityCount =
+            List.length record.responsibilityList           
+
+        yPositions =
+            getPositions peopleCount svgConfig.height
+
+        personPositions =
+            List.map3
+                (\xVal yVal person ->
+                    { x = xVal
+                    , y = yVal
+                    , person = person
+                    })
+                (List.repeat peopleCount personX)
+                yPositions
+                (peopleToList record.responsiblePeople)
+            
+        personTextElements =
+            List.map
+                (\item ->
+                    text_
+                        [ item.x |> toString |> x
+                        , item.y |> toString |> y
+                        ]
+                        [ text item.person.name ])
+                personPositions
+
+        toResponsibilityPositions : Responsibility -> Result () { x : Int, y : Int, responsibility : Responsibility }
+        toResponsibilityPositions responsibility =
+            let
+                matches =
+                    List.filter (\item -> item.person == responsibility.assignee) personPositions
+            in
+            case List.head matches of
+                Just personPosition ->
+                    Ok { x = responsibilityX, y = personPosition.y, responsibility = responsibility }
+
+                Nothing ->
+                    Err ()
+
+        justTheSuccesses : List (Result e a) -> List a
+        justTheSuccesses results =
+            case List.head results of
+                Just result ->
+                    case result of
+                        Ok data ->
+                            data :: justTheSuccesses (List.drop 1 results)
+                        
+                        Err _ ->
+                            justTheSuccesses (List.drop 1 results)
+
+                Nothing ->
+                    [ ]
+                    
+        
+        responsibilityTextElements =
+            record.responsibilityList
+                |> List.map toResponsibilityPositions
+                |> justTheSuccesses
+                |> List.map (\positioned ->
+                    text_
+                        [ positioned.x |> toString |> x
+                        , positioned.y |> toString |> y
+                        ]
+                        [ text positioned.responsibility.description ])
+    in
+    svg
+        [ svgConfig.width |> toString |> width
+        , svgConfig.height |> toString |> height
         ]
+        (List.append personTextElements responsibilityTextElements)
+
+
+getPositions : Int -> Int -> List Int
+getPositions howMany availableSpace =
+    let
+        offset =
+            availableSpace // (howMany + 1)
+    in
+    List.range 1 howMany
+        |> List.map (\index -> index * offset)
 
 
 type Responsibilities
@@ -113,6 +208,12 @@ type alias People =
     , middle : List Person
     , last : Person
     }
+
+
+peopleToList : People -> List Person
+peopleToList people =
+    people.first :: List.append people.middle [ people.last ]
+    
 
 
 nextAfter : Person -> People -> Person

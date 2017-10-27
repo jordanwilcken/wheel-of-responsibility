@@ -14,7 +14,7 @@ import Time
 view model =
     div []
         [ Html.text "some day you can use this space to describe a wheel"
-        , Responsibilities.view model.selectedWheel
+        , Responsibilities.view { width = 800, height = 800 } model.selectedWheel
             |> Svg.map WheelMsg
         ]
 

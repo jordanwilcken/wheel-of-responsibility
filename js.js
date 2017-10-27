@@ -9292,16 +9292,16 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 				return _elm_lang$core$Native_Utils.crashCase(
 					'VirtualDom.Expando',
 					{
-						start: {line: 168, column: 3},
-						end: {line: 235, column: 50}
+						start: {line: 174, column: 5},
+						end: {line: 241, column: 60}
 					},
 					_p31)('No messages for primitives');
 			case 'Primitive':
 				return _elm_lang$core$Native_Utils.crashCase(
 					'VirtualDom.Expando',
 					{
-						start: {line: 168, column: 3},
-						end: {line: 235, column: 50}
+						start: {line: 174, column: 5},
+						end: {line: 241, column: 60}
 					},
 					_p31)('No messages for primitives');
 			case 'Sequence':
@@ -9327,8 +9327,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 							return _elm_lang$core$Native_Utils.crashCase(
 								'VirtualDom.Expando',
 								{
-									start: {line: 176, column: 7},
-									end: {line: 188, column: 46}
+									start: {line: 182, column: 13},
+									end: {line: 194, column: 56}
 								},
 								_p34)('No redirected indexes on sequences');
 						}
@@ -9336,8 +9336,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 						return _elm_lang$core$Native_Utils.crashCase(
 							'VirtualDom.Expando',
 							{
-								start: {line: 176, column: 7},
-								end: {line: 188, column: 46}
+								start: {line: 182, column: 13},
+								end: {line: 194, column: 56}
 							},
 							_p34)('No field on sequences');
 				}
@@ -9357,8 +9357,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 								return _elm_lang$core$Native_Utils.crashCase(
 									'VirtualDom.Expando',
 									{
-										start: {line: 196, column: 11},
-										end: {line: 206, column: 81}
+										start: {line: 202, column: 21},
+										end: {line: 212, column: 102}
 									},
 									_p41)('must have redirect for dictionaries');
 							case 'Key':
@@ -9398,8 +9398,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 						return _elm_lang$core$Native_Utils.crashCase(
 							'VirtualDom.Expando',
 							{
-								start: {line: 191, column: 7},
-								end: {line: 209, column: 50}
+								start: {line: 197, column: 13},
+								end: {line: 215, column: 60}
 							},
 							_p40)('no field for dictionaries');
 				}
@@ -9414,8 +9414,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 						return _elm_lang$core$Native_Utils.crashCase(
 							'VirtualDom.Expando',
 							{
-								start: {line: 212, column: 7},
-								end: {line: 220, column: 77}
+								start: {line: 218, column: 13},
+								end: {line: 226, column: 87}
 							},
 							_p52)('No index for records');
 					default:
@@ -9451,8 +9451,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 							return _elm_lang$core$Native_Utils.crashCase(
 								'VirtualDom.Expando',
 								{
-									start: {line: 223, column: 7},
-									end: {line: 235, column: 50}
+									start: {line: 229, column: 13},
+									end: {line: 241, column: 60}
 								},
 								_p56)('No redirected indexes on sequences');
 						}
@@ -9460,8 +9460,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$update = F2(
 						return _elm_lang$core$Native_Utils.crashCase(
 							'VirtualDom.Expando',
 							{
-								start: {line: 223, column: 7},
-								end: {line: 235, column: 50}
+								start: {line: 229, column: 13},
+								end: {line: 241, column: 60}
 							},
 							_p56)('No field for constructors');
 				}
@@ -9474,8 +9474,8 @@ var _elm_lang$virtual_dom$VirtualDom_Expando$updateField = F2(
 			return _elm_lang$core$Native_Utils.crashCase(
 				'VirtualDom.Expando',
 				{
-					start: {line: 253, column: 3},
-					end: {line: 258, column: 32}
+					start: {line: 259, column: 5},
+					end: {line: 264, column: 38}
 				},
 				_p62)('key does not exist');
 		} else {
@@ -10514,8 +10514,8 @@ var _elm_lang$virtual_dom$VirtualDom_Metadata$decode = function (value) {
 		return _elm_lang$core$Native_Utils.crashCase(
 			'VirtualDom.Metadata',
 			{
-				start: {line: 229, column: 3},
-				end: {line: 239, column: 20}
+				start: {line: 230, column: 5},
+				end: {line: 240, column: 30}
 			},
 			_p25)('Compiler is generating bad metadata. Report this at <https://github.com/elm-lang/virtual-dom/issues>.');
 	} else {
@@ -10623,8 +10623,8 @@ var _elm_lang$virtual_dom$VirtualDom_History$undone = function (getResult) {
 		return _elm_lang$core$Native_Utils.crashCase(
 			'VirtualDom.History',
 			{
-				start: {line: 195, column: 3},
-				end: {line: 200, column: 39}
+				start: {line: 191, column: 5},
+				end: {line: 196, column: 45}
 			},
 			_p5)('Bug in History.get');
 	}
@@ -10879,8 +10879,8 @@ var _elm_lang$virtual_dom$VirtualDom_History$get = F3(
 				return _elm_lang$core$Native_Utils.crashCase(
 					'VirtualDom.History',
 					{
-						start: {line: 165, column: 7},
-						end: {line: 171, column: 95}
+						start: {line: 162, column: 9},
+						end: {line: 168, column: 103}
 					},
 					_p37)('UI should only let you ask for real indexes!');
 			} else {
@@ -13786,6 +13786,20 @@ var _user$project$Responsibilities$nextAfter = F2(
 			}
 		}
 	});
+var _user$project$Responsibilities$peopleToList = function (people) {
+	return {
+		ctor: '::',
+		_0: people.first,
+		_1: A2(
+			_elm_lang$core$List$append,
+			people.middle,
+			{
+				ctor: '::',
+				_0: people.last,
+				_1: {ctor: '[]'}
+			})
+	};
+};
 var _user$project$Responsibilities$changeAssignee = F2(
 	function (nextAfter, responsibility) {
 		return function (theResponsibility) {
@@ -13824,17 +13838,140 @@ var _user$project$Responsibilities$isTimeToRotate = F2(
 			return _elm_lang$core$Native_Utils.cmp(currentTime, _p6.timeCreated + _p6.rotationInterval) > -1;
 		}
 	});
-var _user$project$Responsibilities$view = function (_p7) {
-	var _p8 = _p7;
-	return A2(
-		_elm_lang$svg$Svg$svg,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: _elm_lang$svg$Svg$text('Hello again, world!'),
-			_1: {ctor: '[]'}
-		});
-};
+var _user$project$Responsibilities$getPositions = F2(
+	function (howMany, availableSpace) {
+		var offset = (availableSpace / (howMany + 1)) | 0;
+		return A2(
+			_elm_lang$core$List$map,
+			function (index) {
+				return index * offset;
+			},
+			A2(_elm_lang$core$List$range, 1, howMany));
+	});
+var _user$project$Responsibilities$view = F2(
+	function (svgConfig, _p7) {
+		var _p8 = _p7;
+		var _p12 = _p8._0;
+		var justTheSuccesses = function (results) {
+			justTheSuccesses:
+			while (true) {
+				var _p9 = _elm_lang$core$List$head(results);
+				if (_p9.ctor === 'Just') {
+					var _p10 = _p9._0;
+					if (_p10.ctor === 'Ok') {
+						return {
+							ctor: '::',
+							_0: _p10._0,
+							_1: justTheSuccesses(
+								A2(_elm_lang$core$List$drop, 1, results))
+						};
+					} else {
+						var _v10 = A2(_elm_lang$core$List$drop, 1, results);
+						results = _v10;
+						continue justTheSuccesses;
+					}
+				} else {
+					return {ctor: '[]'};
+				}
+			}
+		};
+		var responsibilityCount = _elm_lang$core$List$length(_p12.responsibilityList);
+		var peopleCount = _elm_lang$core$List$length(
+			_user$project$Responsibilities$peopleToList(_p12.responsiblePeople));
+		var yPositions = A2(_user$project$Responsibilities$getPositions, peopleCount, svgConfig.height);
+		var responsibilityX = 150;
+		var personX = 50;
+		var personPositions = A4(
+			_elm_lang$core$List$map3,
+			F3(
+				function (xVal, yVal, person) {
+					return {x: xVal, y: yVal, person: person};
+				}),
+			A2(_elm_lang$core$List$repeat, peopleCount, personX),
+			yPositions,
+			_user$project$Responsibilities$peopleToList(_p12.responsiblePeople));
+		var personTextElements = A2(
+			_elm_lang$core$List$map,
+			function (item) {
+				return A2(
+					_elm_lang$svg$Svg$text_,
+					{
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$x(
+							_elm_lang$core$Basics$toString(item.x)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$y(
+								_elm_lang$core$Basics$toString(item.y)),
+							_1: {ctor: '[]'}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$svg$Svg$text(item.person.name),
+						_1: {ctor: '[]'}
+					});
+			},
+			personPositions);
+		var toResponsibilityPositions = function (responsibility) {
+			var matches = A2(
+				_elm_lang$core$List$filter,
+				function (item) {
+					return _elm_lang$core$Native_Utils.eq(item.person, responsibility.assignee);
+				},
+				personPositions);
+			var _p11 = _elm_lang$core$List$head(matches);
+			if (_p11.ctor === 'Just') {
+				return _elm_lang$core$Result$Ok(
+					{x: responsibilityX, y: _p11._0.y, responsibility: responsibility});
+			} else {
+				return _elm_lang$core$Result$Err(
+					{ctor: '_Tuple0'});
+			}
+		};
+		var responsibilityTextElements = A2(
+			_elm_lang$core$List$map,
+			function (positioned) {
+				return A2(
+					_elm_lang$svg$Svg$text_,
+					{
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$x(
+							_elm_lang$core$Basics$toString(positioned.x)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$y(
+								_elm_lang$core$Basics$toString(positioned.y)),
+							_1: {ctor: '[]'}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$svg$Svg$text(positioned.responsibility.description),
+						_1: {ctor: '[]'}
+					});
+			},
+			justTheSuccesses(
+				A2(_elm_lang$core$List$map, toResponsibilityPositions, _p12.responsibilityList)));
+		return A2(
+			_elm_lang$svg$Svg$svg,
+			{
+				ctor: '::',
+				_0: _elm_lang$svg$Svg_Attributes$width(
+					_elm_lang$core$Basics$toString(svgConfig.width)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$svg$Svg_Attributes$height(
+						_elm_lang$core$Basics$toString(svgConfig.height)),
+					_1: {ctor: '[]'}
+				}
+			},
+			A2(_elm_lang$core$List$append, personTextElements, responsibilityTextElements));
+	});
+var _user$project$Responsibilities$SvgConfig = F2(
+	function (a, b) {
+		return {width: a, height: b};
+	});
 var _user$project$Responsibilities$Responsibility = F4(
 	function (a, b, c, d) {
 		return {id: a, description: b, assignee: c, nextAssignee: d};
@@ -13878,27 +14015,31 @@ var _user$project$Responsibilities$simpleWheel = function () {
 			responsiblePeople: thePeople
 		});
 }();
-var _user$project$Responsibilities$rotate = function (_p9) {
-	var _p10 = _p9;
-	var _p11 = _p10._0;
-	return _user$project$Responsibilities$Responsibilities(
-		function (newList) {
-			return _elm_lang$core$Native_Utils.update(
-				_p11,
-				{responsibilityList: newList});
-		}(
-			A2(
-				_elm_lang$core$List$map,
-				function (responsibility) {
-					return A2(
-						_user$project$Responsibilities$changeAssignee,
-						function (person) {
-							return A2(_user$project$Responsibilities$nextAfter, person, _p11.responsiblePeople);
-						},
-						responsibility);
-				},
-				_p11.responsibilityList)));
-};
+var _user$project$Responsibilities$rotate = F2(
+	function (currentTime, _p13) {
+		var _p14 = _p13;
+		var _p15 = _p14._0;
+		return _user$project$Responsibilities$Responsibilities(
+			function (newList) {
+				return _elm_lang$core$Native_Utils.update(
+					_p15,
+					{
+						responsibilityList: newList,
+						timeLastRotated: _elm_lang$core$Maybe$Just(currentTime)
+					});
+			}(
+				A2(
+					_elm_lang$core$List$map,
+					function (responsibility) {
+						return A2(
+							_user$project$Responsibilities$changeAssignee,
+							function (person) {
+								return A2(_user$project$Responsibilities$nextAfter, person, _p15.responsiblePeople);
+							},
+							responsibility);
+					},
+					_p15.responsibilityList)));
+	});
 
 var _user$project$Main$needToChangeAndSave = F2(
 	function (currentTime, model) {
@@ -13908,24 +14049,26 @@ var _user$project$Main$saveChanges = function (model) {
 	return _user$project$Ports$saveWheel(
 		_user$project$Responsibilities$encode(model.selectedWheel));
 };
-var _user$project$Main$changeResponsibilities = function (model) {
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{
-			selectedWheel: _user$project$Responsibilities$rotate(model.selectedWheel)
-		});
-};
+var _user$project$Main$changeResponsibilities = F2(
+	function (currentTime, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				selectedWheel: A2(_user$project$Responsibilities$rotate, currentTime, model.selectedWheel)
+			});
+	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
 		switch (_p0.ctor) {
 			case 'TimeChanged':
-				return A2(_user$project$Main$needToChangeAndSave, _p0._0, model) ? A2(
+				var _p1 = _p0._0;
+				return A2(_user$project$Main$needToChangeAndSave, _p1, model) ? A2(
 					_Fresheyeball$elm_return$Return$effect_,
 					_user$project$Main$saveChanges,
 					A2(
 						_Fresheyeball$elm_return$Return$map,
-						_user$project$Main$changeResponsibilities,
+						_user$project$Main$changeResponsibilities(_p1),
 						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none})) : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'WheelMsg':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -13961,7 +14104,10 @@ var _user$project$Main$view = function (model) {
 				_0: A2(
 					_elm_lang$svg$Svg$map,
 					_user$project$Main$WheelMsg,
-					_user$project$Responsibilities$view(model.selectedWheel)),
+					A2(
+						_user$project$Responsibilities$view,
+						{width: 800, height: 800},
+						model.selectedWheel)),
 				_1: {ctor: '[]'}
 			}
 		});
