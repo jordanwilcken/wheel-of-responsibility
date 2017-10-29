@@ -8,6 +8,7 @@ module Responsibilities
         , view
         )
 
+import JobWheel
 import Json.Encode as Encode
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
