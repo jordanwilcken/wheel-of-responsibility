@@ -13731,6 +13731,21 @@ var _krisajenkins$remotedata$RemoteData$update = F2(
 		}
 	});
 
+var _user$project$JobWheel$justTheDecimalPart = function (someFloat) {
+	var negateIfNecessary = function (theDecimalPart) {
+		return (_elm_lang$core$Native_Utils.cmp(someFloat, 0) < 0) ? _elm_lang$core$Basics$negate(theDecimalPart) : theDecimalPart;
+	};
+	return negateIfNecessary(
+		A2(
+			F2(
+				function (x, y) {
+					return x - y;
+				}),
+			someFloat,
+			_elm_lang$core$Basics$toFloat(
+				_elm_lang$core$Basics$floor(
+					_elm_lang$core$Basics$abs(someFloat)))));
+};
 var _user$project$JobWheel$countPeople = function (people) {
 	return (1 + _elm_lang$core$List$length(people.middle)) + 1;
 };
@@ -13848,22 +13863,7 @@ var _user$project$JobWheel$shiftList = F2(
 	function (howMuch, someList) {
 		return (_elm_lang$core$Native_Utils.cmp(howMuch, 0) < 0) ? A2(_user$project$JobWheel$shiftTowardsHead, howMuch, someList) : ((_elm_lang$core$Native_Utils.cmp(howMuch, 0) > 0) ? A2(_user$project$JobWheel$shiftTowardsTail, howMuch, someList) : someList);
 	});
-var _user$project$JobWheel$justTheDecimal = function (someFloat) {
-	var negateIfNecessary = function (theDecimalPart) {
-		return (_elm_lang$core$Native_Utils.cmp(someFloat, 0) < 0) ? _elm_lang$core$Basics$negate(theDecimalPart) : theDecimalPart;
-	};
-	return negateIfNecessary(
-		A2(
-			F2(
-				function (x, y) {
-					return x - y;
-				}),
-			someFloat,
-			_elm_lang$core$Basics$toFloat(
-				_elm_lang$core$Basics$floor(
-					_elm_lang$core$Basics$abs(someFloat)))));
-};
-var _user$project$JobWheel$getChangeInterval = function (_p5) {
+var _user$project$JobWheel$changeInterval = function (_p5) {
 	var _p6 = _p5;
 	var _p7 = _p6._0;
 	return _p7.period / _elm_lang$core$Basics$toFloat(
@@ -13884,13 +13884,13 @@ var _user$project$JobWheel$timeSinceLastChange = F2(
 				function (x, y) {
 					return x * y;
 				}),
-			_user$project$JobWheel$getChangeInterval(jobWheel),
-			_user$project$JobWheel$justTheDecimal(
+			_user$project$JobWheel$changeInterval(jobWheel),
+			_user$project$JobWheel$justTheDecimalPart(
 				A2(_user$project$JobWheel$changesThisTurn, time, jobWheel)));
 	});
 var _user$project$JobWheel$timeOfNextChange = F2(
 	function (time, jobWheel) {
-		return (time + _user$project$JobWheel$getChangeInterval(jobWheel)) - A2(_user$project$JobWheel$timeSinceLastChange, time, jobWheel);
+		return (time + _user$project$JobWheel$changeInterval(jobWheel)) - A2(_user$project$JobWheel$timeSinceLastChange, time, jobWheel);
 	});
 var _user$project$JobWheel$calculateAngleOfRotation = F2(
 	function (time, _p9) {
@@ -13915,9 +13915,12 @@ var _user$project$JobWheel$Person = F2(
 	function (a, b) {
 		return {id: a, name: b};
 	});
-var _user$project$JobWheel$ResponsiblePerson = F2(
-	function (a, b) {
-		return {person: a, job: b};
+var _user$project$JobWheel$toPerson = function (responsiblePerson) {
+	return A2(_user$project$JobWheel$Person, responsiblePerson.id, responsiblePerson.name);
+};
+var _user$project$JobWheel$ResponsiblePerson = F3(
+	function (a, b, c) {
+		return {id: a, name: b, job: c};
 	});
 var _user$project$JobWheel$rotateJobsNTimes = F2(
 	function (n, responsiblePeople) {
@@ -13925,12 +13928,6 @@ var _user$project$JobWheel$rotateJobsNTimes = F2(
 		var peopleCount = _elm_lang$core$List$length(startingList);
 		var simplifiedN = A2(_elm_lang$core$Basics$rem, n, peopleCount);
 		var positiveN = (_elm_lang$core$Native_Utils.cmp(simplifiedN, 0) > -1) ? simplifiedN : (peopleCount + simplifiedN);
-		var justPeople = A2(
-			_elm_lang$core$List$map,
-			function (_) {
-				return _.person;
-			},
-			startingList);
 		var rotatedJobs = A2(
 			_user$project$JobWheel$shiftList,
 			positiveN,
@@ -13940,22 +13937,39 @@ var _user$project$JobWheel$rotateJobsNTimes = F2(
 					return _.job;
 				},
 				startingList));
-		return A3(_elm_lang$core$List$map2, _user$project$JobWheel$ResponsiblePerson, justPeople, rotatedJobs);
+		return A4(
+			_elm_lang$core$List$map3,
+			_user$project$JobWheel$ResponsiblePerson,
+			A2(
+				_elm_lang$core$List$map,
+				function (_) {
+					return _.id;
+				},
+				startingList),
+			A2(
+				_elm_lang$core$List$map,
+				function (_) {
+					return _.name;
+				},
+				startingList),
+			rotatedJobs);
 	});
 var _user$project$JobWheel$Job = F2(
 	function (a, b) {
 		return {id: a, description: b};
 	});
 var _user$project$JobWheel$simplePeople = {
-	first: A2(
+	first: A3(
 		_user$project$JobWheel$ResponsiblePerson,
-		A2(_user$project$JobWheel$Person, 1, 'Jim'),
+		1,
+		'Jim',
 		_elm_lang$core$Maybe$Just(
 			A2(_user$project$JobWheel$Job, 1, 'float like a butterfly'))),
 	middle: {ctor: '[]'},
-	last: A2(
+	last: A3(
 		_user$project$JobWheel$ResponsiblePerson,
-		A2(_user$project$JobWheel$Person, 2, 'Bob'),
+		2,
+		'Bob',
 		_elm_lang$core$Maybe$Just(
 			A2(_user$project$JobWheel$Job, 2, 'sting like a bee')))
 };
@@ -13992,304 +14006,6 @@ var _user$project$Ports$saveWheel = _elm_lang$core$Native_Platform.outgoingPort(
 		return v;
 	});
 var _user$project$Ports$timeNow = _elm_lang$core$Native_Platform.incomingPort('timeNow', _elm_lang$core$Json_Decode$float);
-
-var _user$project$Responsibilities$nextInList = F2(
-	function (person, list) {
-		nextInList:
-		while (true) {
-			var _p0 = _elm_lang$core$List$head(list);
-			if (_p0.ctor === 'Nothing') {
-				return _elm_lang$core$Maybe$Nothing;
-			} else {
-				if (_elm_lang$core$Native_Utils.eq(_p0._0, person)) {
-					return _elm_lang$core$List$head(
-						A2(_elm_lang$core$List$drop, 1, list));
-				} else {
-					var _v1 = person,
-						_v2 = A2(_elm_lang$core$List$drop, 1, list);
-					person = _v1;
-					list = _v2;
-					continue nextInList;
-				}
-			}
-		}
-	});
-var _user$project$Responsibilities$nextAfter = F2(
-	function (person, people) {
-		if (_elm_lang$core$Native_Utils.eq(person, people.first)) {
-			var _p1 = _elm_lang$core$List$head(people.middle);
-			if (_p1.ctor === 'Just') {
-				return _p1._0;
-			} else {
-				return people.last;
-			}
-		} else {
-			if (_elm_lang$core$Native_Utils.eq(person, people.last)) {
-				return people.first;
-			} else {
-				var _p2 = A2(_user$project$Responsibilities$nextInList, person, people.middle);
-				if (_p2.ctor === 'Just') {
-					return _p2._0;
-				} else {
-					return people.last;
-				}
-			}
-		}
-	});
-var _user$project$Responsibilities$peopleToList = function (people) {
-	return {
-		ctor: '::',
-		_0: people.first,
-		_1: A2(
-			_elm_lang$core$List$append,
-			people.middle,
-			{
-				ctor: '::',
-				_0: people.last,
-				_1: {ctor: '[]'}
-			})
-	};
-};
-var _user$project$Responsibilities$changeAssignee = F2(
-	function (nextAfter, responsibility) {
-		return function (theResponsibility) {
-			return _elm_lang$core$Native_Utils.update(
-				theResponsibility,
-				{
-					nextAssignee: nextAfter(theResponsibility.assignee)
-				});
-		}(
-			function (theResponsibility) {
-				return _elm_lang$core$Native_Utils.update(
-					theResponsibility,
-					{assignee: theResponsibility.nextAssignee});
-			}(responsibility));
-	});
-var _user$project$Responsibilities$encode = function (responsibilities) {
-	return _elm_lang$core$Json_Encode$object(
-		{
-			ctor: '::',
-			_0: {
-				ctor: '_Tuple2',
-				_0: 'todo',
-				_1: _elm_lang$core$Json_Encode$string('encode for reals')
-			},
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Responsibilities$isTimeToRotate = F2(
-	function (currentTime, _p3) {
-		var _p4 = _p3;
-		var _p6 = _p4._0;
-		var _p5 = _p6.timeLastRotated;
-		if (_p5.ctor === 'Just') {
-			return _elm_lang$core$Native_Utils.cmp(currentTime, _p5._0 + _p6.rotationInterval) > -1;
-		} else {
-			return _elm_lang$core$Native_Utils.cmp(currentTime, _p6.timeCreated + _p6.rotationInterval) > -1;
-		}
-	});
-var _user$project$Responsibilities$getPositions = F2(
-	function (howMany, availableSpace) {
-		var offset = (availableSpace / (howMany + 1)) | 0;
-		return A2(
-			_elm_lang$core$List$map,
-			function (index) {
-				return index * offset;
-			},
-			A2(_elm_lang$core$List$range, 1, howMany));
-	});
-var _user$project$Responsibilities$view = F2(
-	function (svgConfig, _p7) {
-		var _p8 = _p7;
-		var _p12 = _p8._0;
-		var justTheSuccesses = function (results) {
-			justTheSuccesses:
-			while (true) {
-				var _p9 = _elm_lang$core$List$head(results);
-				if (_p9.ctor === 'Just') {
-					var _p10 = _p9._0;
-					if (_p10.ctor === 'Ok') {
-						return {
-							ctor: '::',
-							_0: _p10._0,
-							_1: justTheSuccesses(
-								A2(_elm_lang$core$List$drop, 1, results))
-						};
-					} else {
-						var _v10 = A2(_elm_lang$core$List$drop, 1, results);
-						results = _v10;
-						continue justTheSuccesses;
-					}
-				} else {
-					return {ctor: '[]'};
-				}
-			}
-		};
-		var responsibilityCount = _elm_lang$core$List$length(_p12.responsibilityList);
-		var peopleCount = _elm_lang$core$List$length(
-			_user$project$Responsibilities$peopleToList(_p12.responsiblePeople));
-		var yPositions = A2(_user$project$Responsibilities$getPositions, peopleCount, svgConfig.height);
-		var responsibilityX = 150;
-		var personX = 50;
-		var personPositions = A4(
-			_elm_lang$core$List$map3,
-			F3(
-				function (xVal, yVal, person) {
-					return {x: xVal, y: yVal, person: person};
-				}),
-			A2(_elm_lang$core$List$repeat, peopleCount, personX),
-			yPositions,
-			_user$project$Responsibilities$peopleToList(_p12.responsiblePeople));
-		var personTextElements = A2(
-			_elm_lang$core$List$map,
-			function (item) {
-				return A2(
-					_elm_lang$svg$Svg$text_,
-					{
-						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$x(
-							_elm_lang$core$Basics$toString(item.x)),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$y(
-								_elm_lang$core$Basics$toString(item.y)),
-							_1: {ctor: '[]'}
-						}
-					},
-					{
-						ctor: '::',
-						_0: _elm_lang$svg$Svg$text(item.person.name),
-						_1: {ctor: '[]'}
-					});
-			},
-			personPositions);
-		var toResponsibilityPositions = function (responsibility) {
-			var matches = A2(
-				_elm_lang$core$List$filter,
-				function (item) {
-					return _elm_lang$core$Native_Utils.eq(item.person, responsibility.assignee);
-				},
-				personPositions);
-			var _p11 = _elm_lang$core$List$head(matches);
-			if (_p11.ctor === 'Just') {
-				return _elm_lang$core$Result$Ok(
-					{x: responsibilityX, y: _p11._0.y, responsibility: responsibility});
-			} else {
-				return _elm_lang$core$Result$Err(
-					{ctor: '_Tuple0'});
-			}
-		};
-		var responsibilityTextElements = A2(
-			_elm_lang$core$List$map,
-			function (positioned) {
-				return A2(
-					_elm_lang$svg$Svg$text_,
-					{
-						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$x(
-							_elm_lang$core$Basics$toString(positioned.x)),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$y(
-								_elm_lang$core$Basics$toString(positioned.y)),
-							_1: {ctor: '[]'}
-						}
-					},
-					{
-						ctor: '::',
-						_0: _elm_lang$svg$Svg$text(positioned.responsibility.description),
-						_1: {ctor: '[]'}
-					});
-			},
-			justTheSuccesses(
-				A2(_elm_lang$core$List$map, toResponsibilityPositions, _p12.responsibilityList)));
-		return A2(
-			_elm_lang$svg$Svg$svg,
-			{
-				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$width(
-					_elm_lang$core$Basics$toString(svgConfig.width)),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$height(
-						_elm_lang$core$Basics$toString(svgConfig.height)),
-					_1: {ctor: '[]'}
-				}
-			},
-			A2(_elm_lang$core$List$append, personTextElements, responsibilityTextElements));
-	});
-var _user$project$Responsibilities$SvgConfig = F2(
-	function (a, b) {
-		return {width: a, height: b};
-	});
-var _user$project$Responsibilities$Responsibility = F4(
-	function (a, b, c, d) {
-		return {id: a, description: b, assignee: c, nextAssignee: d};
-	});
-var _user$project$Responsibilities$simpleResponsibilityList = function (people) {
-	return {
-		ctor: '::',
-		_0: A4(_user$project$Responsibilities$Responsibility, 1, 'float like a butterfly', people.first, people.last),
-		_1: {
-			ctor: '::',
-			_0: A4(_user$project$Responsibilities$Responsibility, 2, 'sting like a bee', people.last, people.first),
-			_1: {ctor: '[]'}
-		}
-	};
-};
-var _user$project$Responsibilities$Person = F2(
-	function (a, b) {
-		return {id: a, name: b};
-	});
-var _user$project$Responsibilities$People = F3(
-	function (a, b, c) {
-		return {first: a, middle: b, last: c};
-	});
-var _user$project$Responsibilities$Responsibilities = function (a) {
-	return {ctor: 'Responsibilities', _0: a};
-};
-var _user$project$Responsibilities$simpleWheel = function () {
-	var bob = A2(_user$project$Responsibilities$Person, 2, 'Bob');
-	var jim = A2(_user$project$Responsibilities$Person, 1, 'Jim');
-	var thePeople = A3(
-		_user$project$Responsibilities$People,
-		jim,
-		{ctor: '[]'},
-		bob);
-	return _user$project$Responsibilities$Responsibilities(
-		{
-			rotationInterval: 5 * _elm_lang$core$Time$second,
-			timeCreated: 0,
-			timeLastRotated: _elm_lang$core$Maybe$Nothing,
-			responsibilityList: _user$project$Responsibilities$simpleResponsibilityList(thePeople),
-			responsiblePeople: thePeople
-		});
-}();
-var _user$project$Responsibilities$rotate = F2(
-	function (currentTime, _p13) {
-		var _p14 = _p13;
-		var _p15 = _p14._0;
-		return _user$project$Responsibilities$Responsibilities(
-			function (newList) {
-				return _elm_lang$core$Native_Utils.update(
-					_p15,
-					{
-						responsibilityList: newList,
-						timeLastRotated: _elm_lang$core$Maybe$Just(currentTime)
-					});
-			}(
-				A2(
-					_elm_lang$core$List$map,
-					function (responsibility) {
-						return A2(
-							_user$project$Responsibilities$changeAssignee,
-							function (person) {
-								return A2(_user$project$Responsibilities$nextAfter, person, _p15.responsiblePeople);
-							},
-							responsibility);
-					},
-					_p15.responsibilityList)));
-	});
 
 var _user$project$Main$getPositions = F2(
 	function (howMany, availableSpace) {
@@ -14354,7 +14070,7 @@ var _user$project$Main$viewCurrentJobs = F2(
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$svg$Svg$text(_p4.person.name),
+							_0: _elm_lang$svg$Svg$text(_p4.name),
 							_1: {ctor: '[]'}
 						});
 					var toAppend = function () {

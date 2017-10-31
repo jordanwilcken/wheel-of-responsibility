@@ -5,7 +5,6 @@ import Html.Attributes exposing (..)
 import JobWheel
 import Ports
 import RemoteData
-import Responsibilities
 import Return
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -42,14 +41,14 @@ viewCurrentJobs svgConfig timeDependentState =
                     let
                         personTextElement =
                             text_
-                              [ x personX
-                              , y <| toString <| yValue
-                              ]
-                              [ Svg.text person.person.name ]
+                                [ x personX
+                                , y <| toString <| yValue
+                                ]
+                                [ Svg.text person.name ]
 
                         maybeJobTextElement =
                             Maybe.map (viewJob responsibilityX yValue) person.job
-                        
+
                         toAppend =
                             case maybeJobTextElement of
                                 Just jobTextElement ->
@@ -60,11 +59,10 @@ viewCurrentJobs svgConfig timeDependentState =
                     in
                     List.append svgList toAppend
 
-
                 textElements =
                     responsiblePeople
-                        |> List.map2 ( , ) yPositions
-                        |> List.foldl concatTextElements [ ]
+                        |> List.map2 (,) yPositions
+                        |> List.foldl concatTextElements []
             in
             svg
                 [ svgConfig.width |> toString |> Svg.Attributes.width
@@ -83,7 +81,7 @@ viewCurrentJobs svgConfig timeDependentState =
                     ]
                     [ Svg.text "I don't know who is doing what right now." ]
                 ]
-            
+
 
 type alias SvgConfig =
     { width : Int
@@ -100,11 +98,12 @@ viewJob xVal yVal job =
         [ Svg.text job.description ]
 
 
+
 -- Model
 
 
 type alias Model =
-    { wheels : RemoteData.RemoteData String (List Responsibilities.Responsibilities)
+    { wheels : RemoteData.RemoteData String (List JobWheel.JobWheel)
     , selectedWheel : JobWheel.JobWheel
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
     , timeOfNextChange : TimeDependentState Time.Time
@@ -151,7 +150,6 @@ update msg model =
                     if currentTime >= time then
                         ( model, Cmd.none )
                             |> Return.map (determineTimeDependentState currentTime)
-
                     else
                         ( model, Cmd.none )
 
@@ -163,11 +161,13 @@ update msg model =
             ( model, Cmd.none )
 
 
+
 -- subscriptions
 
 
 subscriptions model =
     Ports.timeNow TimeReceived
+
 
 
 -- main
@@ -176,6 +176,7 @@ subscriptions model =
 main =
     Html.program
         { init = init, update = update, view = view, subscriptions = subscriptions }
+
 
 
 -- details
@@ -187,6 +188,5 @@ getPositions howMany availableSpace =
         offset =
             availableSpace // (howMany + 1)
     in
-        List.range 1 howMany
-                |> List.map (\index -> index * offset)
-
+    List.range 1 howMany
+        |> List.map (\index -> index * offset)

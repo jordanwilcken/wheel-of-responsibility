@@ -34,7 +34,7 @@ view svgConfig (Responsibilities record) =
             List.length <| peopleToList record.responsiblePeople
 
         responsibilityCount =
-            List.length record.responsibilityList           
+            List.length record.responsibilityList
 
         yPositions =
             getPositions peopleCount svgConfig.height
@@ -45,11 +45,12 @@ view svgConfig (Responsibilities record) =
                     { x = xVal
                     , y = yVal
                     , person = person
-                    })
+                    }
+                )
                 (List.repeat peopleCount personX)
                 yPositions
                 (peopleToList record.responsiblePeople)
-            
+
         personTextElements =
             List.map
                 (\item ->
@@ -57,7 +58,8 @@ view svgConfig (Responsibilities record) =
                         [ item.x |> toString |> x
                         , item.y |> toString |> y
                         ]
-                        [ text item.person.name ])
+                        [ text item.person.name ]
+                )
                 personPositions
 
         toResponsibilityPositions : Responsibility -> Result () { x : Int, y : Int, responsibility : Responsibility }
@@ -80,24 +82,25 @@ view svgConfig (Responsibilities record) =
                     case result of
                         Ok data ->
                             data :: justTheSuccesses (List.drop 1 results)
-                        
+
                         Err _ ->
                             justTheSuccesses (List.drop 1 results)
 
                 Nothing ->
-                    [ ]
-                    
-        
+                    []
+
         responsibilityTextElements =
             record.responsibilityList
                 |> List.map toResponsibilityPositions
                 |> justTheSuccesses
-                |> List.map (\positioned ->
-                    text_
-                        [ positioned.x |> toString |> x
-                        , positioned.y |> toString |> y
-                        ]
-                        [ text positioned.responsibility.description ])
+                |> List.map
+                    (\positioned ->
+                        text_
+                            [ positioned.x |> toString |> x
+                            , positioned.y |> toString |> y
+                            ]
+                            [ text positioned.responsibility.description ]
+                    )
     in
     svg
         [ svgConfig.width |> toString |> width
@@ -214,7 +217,6 @@ type alias People =
 peopleToList : People -> List Person
 peopleToList people =
     people.first :: List.append people.middle [ people.last ]
-    
 
 
 nextAfter : Person -> People -> Person

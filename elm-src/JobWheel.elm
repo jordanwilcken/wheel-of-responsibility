@@ -1,8 +1,12 @@
-module JobWheel exposing
-    ( JobWheel, determineJobsAt, simpleWheel, timeOfNextChange
-    , Job
-    , ResponsiblePerson
-    )
+module JobWheel
+    exposing
+        ( Job
+        , JobWheel
+        , ResponsiblePerson
+        , determineJobsAt
+        , simpleWheel
+        , timeOfNextChange
+        )
 
 import Time
 
@@ -19,82 +23,18 @@ simpleWheel =
 
 simplePeople : ResponsiblePeople
 simplePeople =
-        { first = (ResponsiblePerson (Person 1 "Jim") (Just (Job 1 "float like a butterfly")))
-        , middle = [ ]
-        , last = (ResponsiblePerson (Person 2 "Bob") (Just (Job 2 "sting like a bee")))
-        }
+    { first = ResponsiblePerson 1 "Jim" (Just (Job 1 "float like a butterfly"))
+    , middle = []
+    , last = ResponsiblePerson 2 "Bob" (Just (Job 2 "sting like a bee"))
+    }
 
 
---rotateJobsOnce : Direction -> JobWheel -> JobWheel
---rotateJobsOnce direction (JobWheel record) =
---  let
---    firstToLast : List a -> List a
---    firstToLast someList =
---        case List.head someList of
---            Just item ->
---                someList
---                  |> (\list -> List.append list [ item ])
---                  |> List.drop 1
---            
---            Nothing ->
---                someList
---
---    getLast : List a -> Maybe a
---    getLast someList =
---        someList
---          |> List.reverse
---          |> List.head
---
---    dropLast : List a -> List a
---    dropLast someList =
---      let
---          numberToTake = (List.length someList) - 1
---      in
---          List.take numberToTake someList
---
---    lastToFirst someList =
---      case getLast someList of
---        Just item ->
---          item :: someList
---            |> dropLast
---        
---        Nothing ->
---            someList
---
---    shuffleJobs : List Job -> List Job
---    shuffleJobs =
---        case direction of
---          Clockwise ->
---            firstToLast
---          
---          CounterClockwise ->
---            lastToFirst
---
---    jobs =
---      record.participants
---        |> listPeople
---        |> List.map .job
---        |> shuffleJobs
---        
---  in
---  -- { record
---  --   | participants =
---  --       List.map2
---  --         ResponsiblePerson
---  --         (justThePeople record.participants)
---  --         (justTheJobs record.participants)
---  -- }
---  JobWheel record
-
--- in radians
--- clockwise rotations are negative
--- Elm provides a function "turns" that converts turns to radians
-calculateAngleOfRotation : Time.Time -> JobWheel -> Float
-calculateAngleOfRotation time (JobWheel record) =
+angleOfRotation : Time.Time -> JobWheel -> Float
+angleOfRotation time (JobWheel record) =
     let
         periods =
-            ( time - record.timeCreated ) / record.period
-        
+            (time - record.timeCreated) / record.period
+
         wheelTurns =
             case record.rotationDirection of
                 Clockwise ->
@@ -108,49 +48,33 @@ calculateAngleOfRotation time (JobWheel record) =
 
 timeOfNextChange : Time.Time -> JobWheel -> Time.Time
 timeOfNextChange time jobWheel =
-    time + (getChangeInterval jobWheel) - (timeSinceLastChange time jobWheel)
-        
+    time + changeInterval jobWheel - timeSinceLastChange time jobWheel
+
 
 timeSinceLastChange : Time.Time -> JobWheel -> Time.Time
 timeSinceLastChange time jobWheel =
     changesThisTurn time jobWheel
-        |> justTheDecimal
-        |> (*) (getChangeInterval jobWheel)
+        |> justTheDecimalPart
+        |> (*) (changeInterval jobWheel)
 
 
 changesThisTurn : Time.Time -> JobWheel -> Float
 changesThisTurn time jobWheel =
     let
-        changesPerTurn =
-            case jobWheel of
-                JobWheel record ->
-                    countPeople record.origin
+        currentTurnDecimal =
+            turnDecimal time jobWheel
     in
-    (toFloat changesPerTurn) * (turnDecimal time jobWheel)
+    (changesPerTurn jobWheel |> toFloat) * currentTurnDecimal
 
 
-getChangeInterval : JobWheel -> Time.Time
-getChangeInterval (JobWheel record) =
-    record.period / ((countPeople record.origin) |> toFloat)
+changesPerTurn : JobWheel -> Int
+changesPerTurn (JobWheel record) =
+    countPeople record.origin
 
 
-justTheDecimal : Float -> Float
-justTheDecimal someFloat =
-    let
-        negateIfNecessary : Float -> Float
-        negateIfNecessary theDecimalPart =
-            if someFloat < 0 then
-                negate theDecimalPart
-
-            else
-                theDecimalPart 
-    in
-    someFloat
-        |> abs
-        |> floor
-        |> toFloat
-        |> (-) someFloat
-        |> negateIfNecessary
+changeInterval : JobWheel -> Time.Time
+changeInterval (JobWheel record) =
+    record.period / (countPeople record.origin |> toFloat)
 
 
 determineJobsAt : Time.Time -> JobWheel -> List ResponsiblePerson
@@ -163,12 +87,11 @@ determineJobsAt time (JobWheel record) =
             turnDecimal time (JobWheel record)
 
         jobSwitches =
-             (jobSwitchesPerTurn |> toFloat) * theTurnDecimal
+            (jobSwitchesPerTurn |> toFloat) * theTurnDecimal
 
         switchesRounded =
             if jobSwitches >= 0 then
                 floor jobSwitches
-
             else
                 ceiling jobSwitches
 
@@ -181,7 +104,7 @@ determineJobsAt time (JobWheel record) =
 rotateJobsNTimes : Int -> ResponsiblePeople -> List ResponsiblePerson
 rotateJobsNTimes n responsiblePeople =
     let
-        startingList = 
+        startingList =
             listPeople responsiblePeople
 
         peopleCount =
@@ -193,106 +116,29 @@ rotateJobsNTimes n responsiblePeople =
         positiveN =
             if simplifiedN >= 0 then
                 simplifiedN
-
             else
                 peopleCount + simplifiedN
-
-        justPeople =
-            startingList |> List.map .person
 
         rotatedJobs =
             startingList
                 |> List.map .job
                 |> shiftList positiveN
     in
-    List.map2
+    List.map3
         ResponsiblePerson
-        justPeople
+        (List.map .id startingList)
+        (List.map .name startingList)
         rotatedJobs
 
 
-shiftList : Int -> List a -> List a
-shiftList howMuch someList =
-    if howMuch < 0 then
-        shiftTowardsHead howMuch someList
-
-    else if howMuch > 0 then
-        shiftTowardsTail howMuch someList
-
-    else
-        someList
-
-
-shiftTowardsTail : Int -> List a -> List a
-shiftTowardsTail howMuch someList =
-    if howMuch < 0 then
-        shiftTowardsHead (negate howMuch) someList
-
-    else if howMuch == 0 then
-        someList
-    
-    else
-        shiftTowardsTail (howMuch - 1) (lastToFirst someList)
-
-
-shiftTowardsHead : Int -> List a -> List a
-shiftTowardsHead howMuch someList =
-    if howMuch < 0 then
-        shiftTowardsTail (negate howMuch) someList
-
-    else if howMuch == 0 then
-        someList
-    
-    else
-        shiftTowardsHead (howMuch - 1) (firstToLast someList)
-
-
-getLast : List a -> Maybe a
-getLast someList =
-    someList
-      |> List.reverse
-      |> List.head
-
-dropLast : List a -> List a
-dropLast someList =
-  let
-      numberToTake = (List.length someList) - 1
-  in
-      List.take numberToTake someList
-
-
-lastToFirst : List a -> List a
-lastToFirst someList =
-  case getLast someList of
-    Just item ->
-      item :: someList
-        |> dropLast
-        
-    Nothing ->
-        someList
-
-
-firstToLast : List a -> List a
-firstToLast someList =
-    case List.head someList of
-        Just item ->
-            someList
-              |> (\list -> List.append list [ item ])
-              |> List.drop 1
-        
-        Nothing ->
-            someList
-
-
 turnDecimal : Time.Time -> JobWheel -> Float
-turnDecimal time (JobWheel record) = 
+turnDecimal time (JobWheel record) =
     let
         turns =
             (time - record.timeCreated) / record.period
     in
     if turns >= 0 then
         getPositiveDecimal turns
-    
     else
         getNegativeDecimal turns
 
@@ -300,7 +146,7 @@ turnDecimal time (JobWheel record) =
 getPositiveDecimal : Float -> Float
 getPositiveDecimal theFloat =
     theFloat - (theFloat |> floor |> toFloat)
-        
+
 
 getNegativeDecimal : Float -> Float
 getNegativeDecimal theFloat =
@@ -311,40 +157,144 @@ listPeople : ResponsiblePeople -> List ResponsiblePerson
 listPeople people =
     people.first :: List.append people.middle [ people.last ]
 
-type Direction
-  = Clockwise
-  | CounterClockwise
 
-type JobWheel =
-  JobWheel
-    { timeCreated : Time.Time
-    , period : Time.Time
-    , origin : ResponsiblePeople
-    , rotationDirection : Direction
-    }
+type Direction
+    = Clockwise
+    | CounterClockwise
+
+
+type JobWheel
+    = JobWheel
+        { timeCreated : Time.Time
+        , period : Time.Time
+        , origin : ResponsiblePeople
+        , rotationDirection : Direction
+        }
+
 
 type alias ResponsiblePeople =
-  { first : ResponsiblePerson
-  , middle : List ResponsiblePerson
-  , last : ResponsiblePerson
-  }
+    { first : ResponsiblePerson
+    , middle : List ResponsiblePerson
+    , last : ResponsiblePerson
+    }
 
 
 countPeople : ResponsiblePeople -> Int
 countPeople people =
-    1 + (List.length people.middle) + 1
+    1 + List.length people.middle + 1
+
 
 type alias Person =
-  { id : Int
-  , name : String
-  }
+    { id : Int
+    , name : String
+    }
+
 
 type alias ResponsiblePerson =
-  { person : Person
-  , job : Maybe Job
-  }
+    { id : Int
+    , name : String
+    , job : Maybe Job
+    }
+
+
+toPerson : ResponsiblePerson -> Person
+toPerson responsiblePerson =
+    Person responsiblePerson.id responsiblePerson.name
+
 
 type alias Job =
-  { id : Int
-  , description : String
-  }
+    { id : Int
+    , description : String
+    }
+
+
+
+-- details
+
+
+justTheDecimalPart : Float -> Float
+justTheDecimalPart someFloat =
+    let
+        negateIfNecessary : Float -> Float
+        negateIfNecessary theDecimalPart =
+            if someFloat < 0 then
+                negate theDecimalPart
+            else
+                theDecimalPart
+    in
+    someFloat
+        |> abs
+        |> floor
+        |> toFloat
+        |> (-) someFloat
+        |> negateIfNecessary
+
+
+shiftList : Int -> List a -> List a
+shiftList howMuch someList =
+    if howMuch < 0 then
+        shiftTowardsHead howMuch someList
+    else if howMuch > 0 then
+        shiftTowardsTail howMuch someList
+    else
+        someList
+
+
+shiftTowardsTail : Int -> List a -> List a
+shiftTowardsTail howMuch someList =
+    if howMuch < 0 then
+        shiftTowardsHead (negate howMuch) someList
+    else if howMuch == 0 then
+        someList
+    else
+        shiftTowardsTail (howMuch - 1) (lastToFirst someList)
+
+
+shiftTowardsHead : Int -> List a -> List a
+shiftTowardsHead howMuch someList =
+    if howMuch < 0 then
+        shiftTowardsTail (negate howMuch) someList
+    else if howMuch == 0 then
+        someList
+    else
+        shiftTowardsHead (howMuch - 1) (firstToLast someList)
+
+
+getLast : List a -> Maybe a
+getLast someList =
+    someList
+        |> List.reverse
+        |> List.head
+
+
+dropLast : List a -> List a
+dropLast someList =
+    let
+        numberToTake =
+            List.length someList - 1
+    in
+    List.take numberToTake someList
+
+
+lastToFirst : List a -> List a
+lastToFirst someList =
+    case getLast someList of
+        Just item ->
+            item
+                :: someList
+                |> dropLast
+
+        Nothing ->
+            someList
+
+
+firstToLast : List a -> List a
+firstToLast someList =
+    case List.head someList of
+        Just item ->
+            someList
+                |> (\list -> List.append list [ item ])
+                |> List.drop 1
+
+        Nothing ->
+            someList
