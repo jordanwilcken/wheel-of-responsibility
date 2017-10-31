@@ -1,10 +1,28 @@
-module JobWheel exposing (doStuff)
+module JobWheel exposing
+    ( JobWheel, determineJobsAt, simpleWheel, timeOfNextChange
+    , Job
+    , ResponsiblePerson
+    )
 
 import Time
 
 
-doStuff () =
-  "done"
+simpleWheel : JobWheel
+simpleWheel =
+    JobWheel
+        { timeCreated = 0
+        , period = 4 * Time.second
+        , origin = simplePeople
+        , rotationDirection = Clockwise
+        }
+
+
+simplePeople : ResponsiblePeople
+simplePeople =
+        { first = (ResponsiblePerson (Person 1 "Jim") (Just (Job 1 "float like a butterfly")))
+        , middle = [ ]
+        , last = (ResponsiblePerson (Person 2 "Bob") (Just (Job 2 "sting like a bee")))
+        }
 
 
 --rotateJobsOnce : Direction -> JobWheel -> JobWheel
@@ -86,7 +104,54 @@ calculateAngleOfRotation time (JobWheel record) =
                     periods
     in
     turns wheelTurns
+
+
+timeOfNextChange : Time.Time -> JobWheel -> Time.Time
+timeOfNextChange time jobWheel =
+    time + (getChangeInterval jobWheel) - (timeSinceLastChange time jobWheel)
         
+
+timeSinceLastChange : Time.Time -> JobWheel -> Time.Time
+timeSinceLastChange time jobWheel =
+    changesThisTurn time jobWheel
+        |> justTheDecimal
+        |> (*) (getChangeInterval jobWheel)
+
+
+changesThisTurn : Time.Time -> JobWheel -> Float
+changesThisTurn time jobWheel =
+    let
+        changesPerTurn =
+            case jobWheel of
+                JobWheel record ->
+                    countPeople record.origin
+    in
+    (toFloat changesPerTurn) * (turnDecimal time jobWheel)
+
+
+getChangeInterval : JobWheel -> Time.Time
+getChangeInterval (JobWheel record) =
+    record.period / ((countPeople record.origin) |> toFloat)
+
+
+justTheDecimal : Float -> Float
+justTheDecimal someFloat =
+    let
+        negateIfNecessary : Float -> Float
+        negateIfNecessary theDecimalPart =
+            if someFloat < 0 then
+                negate theDecimalPart
+
+            else
+                theDecimalPart 
+    in
+    someFloat
+        |> abs
+        |> floor
+        |> toFloat
+        |> (-) someFloat
+        |> negateIfNecessary
+
 
 determineJobsAt : Time.Time -> JobWheel -> List ResponsiblePerson
 determineJobsAt time (JobWheel record) =
@@ -254,7 +319,6 @@ type JobWheel =
   JobWheel
     { timeCreated : Time.Time
     , period : Time.Time
-    , participants : ResponsiblePeople
     , origin : ResponsiblePeople
     , rotationDirection : Direction
     }

@@ -4,7 +4,7 @@ import Json.Encode as Encode
 import Time
 
 
-port loadWheels : {} -> Cmd msg
+port loadWheels : () -> Cmd msg
 
 
 port saveWheel : Encode.Value -> Cmd msg
