@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onInput)
 import JobWheel
 import Ports
 import RemoteData
@@ -14,9 +15,60 @@ import Time
 view : Model -> Html.Html Msg
 view model =
     div []
-        [ Html.text "some day you can use this space to describe a wheel"
+        [ viewWheel model
+        , viewWheelForm
+        ]
+
+
+viewWheel : Model -> Html.Html Msg
+viewWheel model =
+    let
+        (Entity selectedId selectedWheel) =
+            identity model.selectedWheel
+    in
+    div []
+        [ Html.select
+            [ onInput SelectedWheelChanged
+            , value (selectedId |> toString)
+            ]
+            (viewOptionsForWheels model)
         , viewCurrentJobs { width = 800, height = 800 } model.currentJobs
         ]
+
+
+viewOptionsForWheels : Model -> List (Html.Html Msg)
+viewOptionsForWheels model =
+    let
+        optionCurrentlySelected =
+            wheelEntityToOptionEl model.selectedWheel
+
+        wheelsToElements : JobWheelList -> List (Html Msg)
+        wheelsToElements jobWheelList =
+            List.map wheelEntityToOptionEl jobWheelList
+
+        remoteOptionsForOtherWheels : RemoteData.RemoteData String (List (Html Msg))
+        remoteOptionsForOtherWheels =
+            model.wheels
+                |> RemoteData.map wheelsToElements
+    in
+    case remoteOptionsForOtherWheels of
+        RemoteData.Success optionElements ->
+            List.append [ optionCurrentlySelected ] optionElements
+
+        _ ->
+            [ optionCurrentlySelected ]
+
+
+wheelEntityToOptionEl : Entity JobWheel.JobWheel -> Html Msg
+wheelEntityToOptionEl (Entity id jobWheel) =
+    option
+        [ value (id |> toString) ] 
+        [ Html.text (jobWheel |> JobWheel.describeWheel) ]
+            
+
+viewWheelForm : Html.Html Msg
+viewWheelForm =
+    Html.text "This is the form"
 
 
 viewCurrentJobs : SvgConfig -> TimeDependentState (List JobWheel.ResponsiblePerson) -> Svg.Svg Msg
@@ -103,11 +155,49 @@ viewJob xVal yVal job =
 
 
 type alias Model =
-    { wheels : RemoteData.RemoteData String (List JobWheel.JobWheel)
-    , selectedWheel : JobWheel.JobWheel
+    { wheels : RemoteData.RemoteData String JobWheelList
+    , selectedWheel : Entity JobWheel.JobWheel
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
     , timeOfNextChange : TimeDependentState Time.Time
     }
+
+
+changeSelectedWheel : Entity JobWheel.JobWheel -> Model -> Model
+changeSelectedWheel newlySelected model =
+    { model
+        | selectedWheel = newlySelected
+        , currentJobs = Unknown
+        , timeOfNextChange = Unknown
+    }
+
+
+type alias JobWheelList =
+    List (Entity JobWheel.JobWheel)
+
+
+findWheel : Int -> RemoteData.RemoteData String JobWheelList -> Result String (Entity JobWheel.JobWheel)
+findWheel id remoteWheelList =
+    case remoteWheelList of
+        RemoteData.Success jobWheelList ->
+            let
+                idsMatch : Entity (JobWheel.JobWheel) -> Bool
+                idsMatch (Entity someId _) =
+                    someId == id
+            in
+            jobWheelList |> firstInList idsMatch
+
+        _ ->
+            Err "don't have wheel list"
+    
+
+
+type Entity a =
+    Entity Int a
+
+
+justTheValue : Entity a -> a
+justTheValue (Entity id value) =
+    value
 
 
 type TimeDependentState a
@@ -117,9 +207,13 @@ type TimeDependentState a
 
 determineTimeDependentState : Time.Time -> Model -> Model
 determineTimeDependentState time model =
+    let
+        selectedWheel =
+            justTheValue model.selectedWheel
+    in
     { model
-        | currentJobs = Known (JobWheel.determineJobsAt time model.selectedWheel)
-        , timeOfNextChange = Known (JobWheel.timeOfNextChange time model.selectedWheel)
+        | currentJobs = Known (JobWheel.determineJobsAt time selectedWheel)
+        , timeOfNextChange = Known (JobWheel.timeOfNextChange time selectedWheel)
     }
 
 
@@ -128,7 +222,7 @@ init =
     let
         startingModel =
             { wheels = RemoteData.Loading
-            , selectedWheel = JobWheel.simpleWheel
+            , selectedWheel = Entity 0 JobWheel.simpleWheel
             , currentJobs = Unknown
             , timeOfNextChange = Unknown
             }
@@ -139,6 +233,7 @@ init =
 type Msg
     = Nevermind
     | TimeReceived Time.Time
+    | SelectedWheelChanged String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -156,6 +251,21 @@ update msg model =
                 Unknown ->
                     ( model, Cmd.none )
                         |> Return.map (determineTimeDependentState currentTime)
+
+        SelectedWheelChanged newValue ->
+            let
+                findWheelResult =
+                    newValue
+                        |> String.toInt
+                        |> Result.andThen (\id -> findWheel id model.wheels)
+            in
+            case findWheelResult of
+                Ok wheel -> 
+                    ( model, Cmd.none )
+                        |> Return.map (changeSelectedWheel wheel)
+
+                Err _->
+                    ( model, Cmd.none )
 
         Nevermind ->
             ( model, Cmd.none )
@@ -190,3 +300,17 @@ getPositions howMany availableSpace =
     in
     List.range 1 howMany
         |> List.map (\index -> index * offset)
+
+
+firstInList : (a -> Bool) -> List a -> Result String a
+firstInList checkMatch someList =
+    case List.head someList of
+        Just item ->
+            if checkMatch item then
+                Ok item
+
+            else
+                firstInList checkMatch (List.drop 1 someList)
+
+        Nothing ->
+            Err ""

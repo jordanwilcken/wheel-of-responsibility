@@ -12820,6 +12820,121 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
 
+var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$html$Html_Events$targetChecked = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'checked',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$bool);
+var _elm_lang$html$Html_Events$targetValue = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'value',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
+var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
+var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
+var _elm_lang$html$Html_Events$onFocus = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'focus',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onBlur = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'blur',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
+	_elm_lang$html$Html_Events$defaultOptions,
+	{preventDefault: true});
+var _elm_lang$html$Html_Events$onSubmit = function (msg) {
+	return A3(
+		_elm_lang$html$Html_Events$onWithOptions,
+		'submit',
+		_elm_lang$html$Html_Events$onSubmitOptions,
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onCheck = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'change',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
+};
+var _elm_lang$html$Html_Events$onInput = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'input',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
+};
+var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseout',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseover',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseleave',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseenter',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseup',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mousedown',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'dblclick',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'click',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$Options = F2(
+	function (a, b) {
+		return {stopPropagation: a, preventDefault: b};
+	});
+
 var _elm_lang$http$Native_Http = function() {
 
 
@@ -13731,6 +13846,91 @@ var _krisajenkins$remotedata$RemoteData$update = F2(
 		}
 	});
 
+var _user$project$JobWheel$firstToLast = function (someList) {
+	var _p0 = _elm_lang$core$List$head(someList);
+	if (_p0.ctor === 'Just') {
+		return A2(
+			_elm_lang$core$List$drop,
+			1,
+			function (list) {
+				return A2(
+					_elm_lang$core$List$append,
+					list,
+					{
+						ctor: '::',
+						_0: _p0._0,
+						_1: {ctor: '[]'}
+					});
+			}(someList));
+	} else {
+		return someList;
+	}
+};
+var _user$project$JobWheel$dropLast = function (someList) {
+	var numberToTake = _elm_lang$core$List$length(someList) - 1;
+	return A2(_elm_lang$core$List$take, numberToTake, someList);
+};
+var _user$project$JobWheel$getLast = function (someList) {
+	return _elm_lang$core$List$head(
+		_elm_lang$core$List$reverse(someList));
+};
+var _user$project$JobWheel$lastToFirst = function (someList) {
+	var _p1 = _user$project$JobWheel$getLast(someList);
+	if (_p1.ctor === 'Just') {
+		return _user$project$JobWheel$dropLast(
+			{ctor: '::', _0: _p1._0, _1: someList});
+	} else {
+		return someList;
+	}
+};
+var _user$project$JobWheel$shiftTowardsTail = F2(
+	function (howMuch, someList) {
+		shiftTowardsTail:
+		while (true) {
+			if (_elm_lang$core$Native_Utils.cmp(howMuch, 0) < 0) {
+				return A2(
+					_user$project$JobWheel$shiftTowardsHead,
+					_elm_lang$core$Basics$negate(howMuch),
+					someList);
+			} else {
+				if (_elm_lang$core$Native_Utils.eq(howMuch, 0)) {
+					return someList;
+				} else {
+					var _v2 = howMuch - 1,
+						_v3 = _user$project$JobWheel$lastToFirst(someList);
+					howMuch = _v2;
+					someList = _v3;
+					continue shiftTowardsTail;
+				}
+			}
+		}
+	});
+var _user$project$JobWheel$shiftTowardsHead = F2(
+	function (howMuch, someList) {
+		shiftTowardsHead:
+		while (true) {
+			if (_elm_lang$core$Native_Utils.cmp(howMuch, 0) < 0) {
+				return A2(
+					_user$project$JobWheel$shiftTowardsTail,
+					_elm_lang$core$Basics$negate(howMuch),
+					someList);
+			} else {
+				if (_elm_lang$core$Native_Utils.eq(howMuch, 0)) {
+					return someList;
+				} else {
+					var _v4 = howMuch - 1,
+						_v5 = _user$project$JobWheel$firstToLast(someList);
+					howMuch = _v4;
+					someList = _v5;
+					continue shiftTowardsHead;
+				}
+			}
+		}
+	});
+var _user$project$JobWheel$shiftList = F2(
+	function (howMuch, someList) {
+		return (_elm_lang$core$Native_Utils.cmp(howMuch, 0) < 0) ? A2(_user$project$JobWheel$shiftTowardsHead, howMuch, someList) : ((_elm_lang$core$Native_Utils.cmp(howMuch, 0) > 0) ? A2(_user$project$JobWheel$shiftTowardsTail, howMuch, someList) : someList);
+	});
 var _user$project$JobWheel$justTheDecimalPart = function (someFloat) {
 	var negateIfNecessary = function (theDecimalPart) {
 		return (_elm_lang$core$Native_Utils.cmp(someFloat, 0) < 0) ? _elm_lang$core$Basics$negate(theDecimalPart) : theDecimalPart;
@@ -13772,96 +13972,11 @@ var _user$project$JobWheel$getPositiveDecimal = function (theFloat) {
 		_elm_lang$core$Basics$floor(theFloat));
 };
 var _user$project$JobWheel$turnDecimal = F2(
-	function (time, _p0) {
-		var _p1 = _p0;
-		var _p2 = _p1._0;
-		var turns = (time - _p2.timeCreated) / _p2.period;
+	function (time, _p2) {
+		var _p3 = _p2;
+		var _p4 = _p3._0;
+		var turns = (time - _p4.timeCreated) / _p4.period;
 		return (_elm_lang$core$Native_Utils.cmp(turns, 0) > -1) ? _user$project$JobWheel$getPositiveDecimal(turns) : _user$project$JobWheel$getNegativeDecimal(turns);
-	});
-var _user$project$JobWheel$firstToLast = function (someList) {
-	var _p3 = _elm_lang$core$List$head(someList);
-	if (_p3.ctor === 'Just') {
-		return A2(
-			_elm_lang$core$List$drop,
-			1,
-			function (list) {
-				return A2(
-					_elm_lang$core$List$append,
-					list,
-					{
-						ctor: '::',
-						_0: _p3._0,
-						_1: {ctor: '[]'}
-					});
-			}(someList));
-	} else {
-		return someList;
-	}
-};
-var _user$project$JobWheel$dropLast = function (someList) {
-	var numberToTake = _elm_lang$core$List$length(someList) - 1;
-	return A2(_elm_lang$core$List$take, numberToTake, someList);
-};
-var _user$project$JobWheel$getLast = function (someList) {
-	return _elm_lang$core$List$head(
-		_elm_lang$core$List$reverse(someList));
-};
-var _user$project$JobWheel$lastToFirst = function (someList) {
-	var _p4 = _user$project$JobWheel$getLast(someList);
-	if (_p4.ctor === 'Just') {
-		return _user$project$JobWheel$dropLast(
-			{ctor: '::', _0: _p4._0, _1: someList});
-	} else {
-		return someList;
-	}
-};
-var _user$project$JobWheel$shiftTowardsTail = F2(
-	function (howMuch, someList) {
-		shiftTowardsTail:
-		while (true) {
-			if (_elm_lang$core$Native_Utils.cmp(howMuch, 0) < 0) {
-				return A2(
-					_user$project$JobWheel$shiftTowardsHead,
-					_elm_lang$core$Basics$negate(howMuch),
-					someList);
-			} else {
-				if (_elm_lang$core$Native_Utils.eq(howMuch, 0)) {
-					return someList;
-				} else {
-					var _v3 = howMuch - 1,
-						_v4 = _user$project$JobWheel$lastToFirst(someList);
-					howMuch = _v3;
-					someList = _v4;
-					continue shiftTowardsTail;
-				}
-			}
-		}
-	});
-var _user$project$JobWheel$shiftTowardsHead = F2(
-	function (howMuch, someList) {
-		shiftTowardsHead:
-		while (true) {
-			if (_elm_lang$core$Native_Utils.cmp(howMuch, 0) < 0) {
-				return A2(
-					_user$project$JobWheel$shiftTowardsTail,
-					_elm_lang$core$Basics$negate(howMuch),
-					someList);
-			} else {
-				if (_elm_lang$core$Native_Utils.eq(howMuch, 0)) {
-					return someList;
-				} else {
-					var _v5 = howMuch - 1,
-						_v6 = _user$project$JobWheel$firstToLast(someList);
-					howMuch = _v5;
-					someList = _v6;
-					continue shiftTowardsHead;
-				}
-			}
-		}
-	});
-var _user$project$JobWheel$shiftList = F2(
-	function (howMuch, someList) {
-		return (_elm_lang$core$Native_Utils.cmp(howMuch, 0) < 0) ? A2(_user$project$JobWheel$shiftTowardsHead, howMuch, someList) : ((_elm_lang$core$Native_Utils.cmp(howMuch, 0) > 0) ? A2(_user$project$JobWheel$shiftTowardsTail, howMuch, someList) : someList);
 	});
 var _user$project$JobWheel$changeInterval = function (_p5) {
 	var _p6 = _p5;
@@ -13869,13 +13984,15 @@ var _user$project$JobWheel$changeInterval = function (_p5) {
 	return _p7.period / _elm_lang$core$Basics$toFloat(
 		_user$project$JobWheel$countPeople(_p7.origin));
 };
+var _user$project$JobWheel$changesPerTurn = function (_p8) {
+	var _p9 = _p8;
+	return _user$project$JobWheel$countPeople(_p9._0.origin);
+};
 var _user$project$JobWheel$changesThisTurn = F2(
 	function (time, jobWheel) {
-		var changesPerTurn = function () {
-			var _p8 = jobWheel;
-			return _user$project$JobWheel$countPeople(_p8._0.origin);
-		}();
-		return _elm_lang$core$Basics$toFloat(changesPerTurn) * A2(_user$project$JobWheel$turnDecimal, time, jobWheel);
+		var currentTurnDecimal = A2(_user$project$JobWheel$turnDecimal, time, jobWheel);
+		return _elm_lang$core$Basics$toFloat(
+			_user$project$JobWheel$changesPerTurn(jobWheel)) * currentTurnDecimal;
 	});
 var _user$project$JobWheel$timeSinceLastChange = F2(
 	function (time, jobWheel) {
@@ -13892,14 +14009,18 @@ var _user$project$JobWheel$timeOfNextChange = F2(
 	function (time, jobWheel) {
 		return (time + _user$project$JobWheel$changeInterval(jobWheel)) - A2(_user$project$JobWheel$timeSinceLastChange, time, jobWheel);
 	});
-var _user$project$JobWheel$calculateAngleOfRotation = F2(
-	function (time, _p9) {
-		var _p10 = _p9;
-		var _p12 = _p10._0;
-		var periods = (time - _p12.timeCreated) / _p12.period;
+var _user$project$JobWheel$describeWheel = function (_p10) {
+	var _p11 = _p10;
+	return _p11._0.description;
+};
+var _user$project$JobWheel$angleOfRotation = F2(
+	function (time, _p12) {
+		var _p13 = _p12;
+		var _p15 = _p13._0;
+		var periods = (time - _p15.timeCreated) / _p15.period;
 		var wheelTurns = function () {
-			var _p11 = _p12.rotationDirection;
-			if (_p11.ctor === 'Clockwise') {
+			var _p14 = _p15.rotationDirection;
+			if (_p14.ctor === 'Clockwise') {
 				return _elm_lang$core$Basics$negate(periods);
 			} else {
 				return periods;
@@ -13979,19 +14100,19 @@ var _user$project$JobWheel$JobWheel = function (a) {
 	return {ctor: 'JobWheel', _0: a};
 };
 var _user$project$JobWheel$simpleWheel = _user$project$JobWheel$JobWheel(
-	{timeCreated: 0, period: 4 * _elm_lang$core$Time$second, origin: _user$project$JobWheel$simplePeople, rotationDirection: _user$project$JobWheel$Clockwise});
+	{description: 'Example Job Wheel', timeCreated: 0, period: 4 * _elm_lang$core$Time$second, origin: _user$project$JobWheel$simplePeople, rotationDirection: _user$project$JobWheel$Clockwise});
 var _user$project$JobWheel$determineJobsAt = F2(
-	function (time, _p13) {
-		var _p14 = _p13;
-		var _p15 = _p14._0;
+	function (time, _p16) {
+		var _p17 = _p16;
+		var _p18 = _p17._0;
 		var theTurnDecimal = A2(
 			_user$project$JobWheel$turnDecimal,
 			time,
-			_user$project$JobWheel$JobWheel(_p15));
-		var jobSwitchesPerTurn = _user$project$JobWheel$countPeople(_p15.origin);
+			_user$project$JobWheel$JobWheel(_p18));
+		var jobSwitchesPerTurn = _user$project$JobWheel$countPeople(_p18.origin);
 		var jobSwitches = _elm_lang$core$Basics$toFloat(jobSwitchesPerTurn) * theTurnDecimal;
 		var switchesRounded = (_elm_lang$core$Native_Utils.cmp(jobSwitches, 0) > -1) ? _elm_lang$core$Basics$floor(jobSwitches) : _elm_lang$core$Basics$ceiling(jobSwitches);
-		var personList = A2(_user$project$JobWheel$rotateJobsNTimes, switchesRounded, _p15.origin);
+		var personList = A2(_user$project$JobWheel$rotateJobsNTimes, switchesRounded, _p18.origin);
 		return personList;
 	});
 
@@ -14007,6 +14128,27 @@ var _user$project$Ports$saveWheel = _elm_lang$core$Native_Platform.outgoingPort(
 	});
 var _user$project$Ports$timeNow = _elm_lang$core$Native_Platform.incomingPort('timeNow', _elm_lang$core$Json_Decode$float);
 
+var _user$project$Main$firstInList = F2(
+	function (checkMatch, someList) {
+		firstInList:
+		while (true) {
+			var _p0 = _elm_lang$core$List$head(someList);
+			if (_p0.ctor === 'Just') {
+				var _p1 = _p0._0;
+				if (checkMatch(_p1)) {
+					return _elm_lang$core$Result$Ok(_p1);
+				} else {
+					var _v1 = checkMatch,
+						_v2 = A2(_elm_lang$core$List$drop, 1, someList);
+					checkMatch = _v1;
+					someList = _v2;
+					continue firstInList;
+				}
+			} else {
+				return _elm_lang$core$Result$Err('');
+			}
+		}
+	});
 var _user$project$Main$getPositions = F2(
 	function (howMany, availableSpace) {
 		var offset = (availableSpace / (howMany + 1)) | 0;
@@ -14016,6 +14158,23 @@ var _user$project$Main$getPositions = F2(
 				return index * offset;
 			},
 			A2(_elm_lang$core$List$range, 1, howMany));
+	});
+var _user$project$Main$justTheValue = function (_p2) {
+	var _p3 = _p2;
+	return _p3._1;
+};
+var _user$project$Main$findWheel = F2(
+	function (id, remoteWheelList) {
+		var _p4 = remoteWheelList;
+		if (_p4.ctor === 'Success') {
+			var idsMatch = function (_p5) {
+				var _p6 = _p5;
+				return _elm_lang$core$Native_Utils.eq(_p6._0, id);
+			};
+			return A2(_user$project$Main$firstInList, idsMatch, _p4._0);
+		} else {
+			return _elm_lang$core$Result$Err('don\'t have wheel list');
+		}
 	});
 var _user$project$Main$viewJob = F3(
 	function (xVal, yVal, job) {
@@ -14040,22 +14199,22 @@ var _user$project$Main$viewJob = F3(
 	});
 var _user$project$Main$viewCurrentJobs = F2(
 	function (svgConfig, timeDependentState) {
-		var _p0 = timeDependentState;
-		if (_p0.ctor === 'Known') {
-			var _p6 = _p0._0;
-			var peopleCount = _elm_lang$core$List$length(_p6);
+		var _p7 = timeDependentState;
+		if (_p7.ctor === 'Known') {
+			var _p13 = _p7._0;
+			var peopleCount = _elm_lang$core$List$length(_p13);
 			var yPositions = A2(_user$project$Main$getPositions, peopleCount, svgConfig.height);
 			var responsibilityX = 150;
 			var personX = '50';
 			var concatTextElements = F2(
-				function (_p1, svgList) {
-					var _p2 = _p1;
-					var _p5 = _p2._0;
-					var _p4 = _p2._1;
+				function (_p8, svgList) {
+					var _p9 = _p8;
+					var _p12 = _p9._0;
+					var _p11 = _p9._1;
 					var maybeJobTextElement = A2(
 						_elm_lang$core$Maybe$map,
-						A2(_user$project$Main$viewJob, responsibilityX, _p5),
-						_p4.job);
+						A2(_user$project$Main$viewJob, responsibilityX, _p12),
+						_p11.job);
 					var personTextElement = A2(
 						_elm_lang$svg$Svg$text_,
 						{
@@ -14064,24 +14223,24 @@ var _user$project$Main$viewCurrentJobs = F2(
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Attributes$y(
-									_elm_lang$core$Basics$toString(_p5)),
+									_elm_lang$core$Basics$toString(_p12)),
 								_1: {ctor: '[]'}
 							}
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$svg$Svg$text(_p4.name),
+							_0: _elm_lang$svg$Svg$text(_p11.name),
 							_1: {ctor: '[]'}
 						});
 					var toAppend = function () {
-						var _p3 = maybeJobTextElement;
-						if (_p3.ctor === 'Just') {
+						var _p10 = maybeJobTextElement;
+						if (_p10.ctor === 'Just') {
 							return {
 								ctor: '::',
 								_0: personTextElement,
 								_1: {
 									ctor: '::',
-									_0: _p3._0,
+									_0: _p10._0,
 									_1: {ctor: '[]'}
 								}
 							};
@@ -14106,7 +14265,7 @@ var _user$project$Main$viewCurrentJobs = F2(
 							return {ctor: '_Tuple2', _0: v0, _1: v1};
 						}),
 					yPositions,
-					_p6));
+					_p13));
 			return A2(
 				_elm_lang$svg$Svg$svg,
 				{
@@ -14157,13 +14316,159 @@ var _user$project$Main$viewCurrentJobs = F2(
 				});
 		}
 	});
-var _user$project$Main$view = function (model) {
+var _user$project$Main$viewWheelForm = _elm_lang$html$Html$text('This is the form');
+var _user$project$Main$wheelEntityToOptionEl = function (_p14) {
+	var _p15 = _p14;
+	return A2(
+		_elm_lang$html$Html$option,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$value(
+				_elm_lang$core$Basics$toString(_p15._0)),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(
+				_user$project$JobWheel$describeWheel(_p15._1)),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Main$viewOptionsForWheels = function (model) {
+	var wheelsToElements = function (jobWheelList) {
+		return A2(_elm_lang$core$List$map, _user$project$Main$wheelEntityToOptionEl, jobWheelList);
+	};
+	var remoteOptionsForOtherWheels = A2(_krisajenkins$remotedata$RemoteData$map, wheelsToElements, model.wheels);
+	var optionCurrentlySelected = _user$project$Main$wheelEntityToOptionEl(model.selectedWheel);
+	var _p16 = remoteOptionsForOtherWheels;
+	if (_p16.ctor === 'Success') {
+		return A2(
+			_elm_lang$core$List$append,
+			{
+				ctor: '::',
+				_0: optionCurrentlySelected,
+				_1: {ctor: '[]'}
+			},
+			_p16._0);
+	} else {
+		return {
+			ctor: '::',
+			_0: optionCurrentlySelected,
+			_1: {ctor: '[]'}
+		};
+	}
+};
+var _user$project$Main$SvgConfig = F2(
+	function (a, b) {
+		return {width: a, height: b};
+	});
+var _user$project$Main$Model = F4(
+	function (a, b, c, d) {
+		return {wheels: a, selectedWheel: b, currentJobs: c, timeOfNextChange: d};
+	});
+var _user$project$Main$Entity = F2(
+	function (a, b) {
+		return {ctor: 'Entity', _0: a, _1: b};
+	});
+var _user$project$Main$Known = function (a) {
+	return {ctor: 'Known', _0: a};
+};
+var _user$project$Main$determineTimeDependentState = F2(
+	function (time, model) {
+		var selectedWheel = _user$project$Main$justTheValue(model.selectedWheel);
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				currentJobs: _user$project$Main$Known(
+					A2(_user$project$JobWheel$determineJobsAt, time, selectedWheel)),
+				timeOfNextChange: _user$project$Main$Known(
+					A2(_user$project$JobWheel$timeOfNextChange, time, selectedWheel))
+			});
+	});
+var _user$project$Main$Unknown = {ctor: 'Unknown'};
+var _user$project$Main$changeSelectedWheel = F2(
+	function (newlySelected, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{selectedWheel: newlySelected, currentJobs: _user$project$Main$Unknown, timeOfNextChange: _user$project$Main$Unknown});
+	});
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p17 = msg;
+		switch (_p17.ctor) {
+			case 'TimeReceived':
+				var _p19 = _p17._0;
+				var _p18 = model.timeOfNextChange;
+				if (_p18.ctor === 'Known') {
+					return (_elm_lang$core$Native_Utils.cmp(_p19, _p18._0) > -1) ? A2(
+						_Fresheyeball$elm_return$Return$map,
+						_user$project$Main$determineTimeDependentState(_p19),
+						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none}) : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				} else {
+					return A2(
+						_Fresheyeball$elm_return$Return$map,
+						_user$project$Main$determineTimeDependentState(_p19),
+						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
+				}
+			case 'SelectedWheelChanged':
+				var findWheelResult = A2(
+					_elm_lang$core$Result$andThen,
+					function (id) {
+						return A2(_user$project$Main$findWheel, id, model.wheels);
+					},
+					_elm_lang$core$String$toInt(_p17._0));
+				var _p20 = findWheelResult;
+				if (_p20.ctor === 'Ok') {
+					return A2(
+						_Fresheyeball$elm_return$Return$map,
+						_user$project$Main$changeSelectedWheel(_p20._0),
+						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
+				} else {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				}
+			default:
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+		}
+	});
+var _user$project$Main$init = function () {
+	var startingModel = {
+		wheels: _krisajenkins$remotedata$RemoteData$Loading,
+		selectedWheel: A2(_user$project$Main$Entity, 0, _user$project$JobWheel$simpleWheel),
+		currentJobs: _user$project$Main$Unknown,
+		timeOfNextChange: _user$project$Main$Unknown
+	};
+	return {
+		ctor: '_Tuple2',
+		_0: startingModel,
+		_1: _user$project$Ports$loadWheels(
+			{ctor: '_Tuple0'})
+	};
+}();
+var _user$project$Main$SelectedWheelChanged = function (a) {
+	return {ctor: 'SelectedWheelChanged', _0: a};
+};
+var _user$project$Main$viewWheel = function (model) {
+	var _p21 = _elm_lang$core$Basics$identity(model.selectedWheel);
+	var selectedId = _p21._0;
+	var selectedWheel = _p21._1;
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html$text('some day you can use this space to describe a wheel'),
+			_0: A2(
+				_elm_lang$html$Html$select,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$SelectedWheelChanged),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$value(
+							_elm_lang$core$Basics$toString(selectedId)),
+						_1: {ctor: '[]'}
+					}
+				},
+				_user$project$Main$viewOptionsForWheels(model)),
 			_1: {
 				ctor: '::',
 				_0: A2(
@@ -14174,59 +14479,20 @@ var _user$project$Main$view = function (model) {
 			}
 		});
 };
-var _user$project$Main$SvgConfig = F2(
-	function (a, b) {
-		return {width: a, height: b};
-	});
-var _user$project$Main$Model = F4(
-	function (a, b, c, d) {
-		return {wheels: a, selectedWheel: b, currentJobs: c, timeOfNextChange: d};
-	});
-var _user$project$Main$Known = function (a) {
-	return {ctor: 'Known', _0: a};
-};
-var _user$project$Main$determineTimeDependentState = F2(
-	function (time, model) {
-		return _elm_lang$core$Native_Utils.update(
-			model,
-			{
-				currentJobs: _user$project$Main$Known(
-					A2(_user$project$JobWheel$determineJobsAt, time, model.selectedWheel)),
-				timeOfNextChange: _user$project$Main$Known(
-					A2(_user$project$JobWheel$timeOfNextChange, time, model.selectedWheel))
-			});
-	});
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p7 = msg;
-		if (_p7.ctor === 'TimeReceived') {
-			var _p9 = _p7._0;
-			var _p8 = model.timeOfNextChange;
-			if (_p8.ctor === 'Known') {
-				return (_elm_lang$core$Native_Utils.cmp(_p9, _p8._0) > -1) ? A2(
-					_Fresheyeball$elm_return$Return$map,
-					_user$project$Main$determineTimeDependentState(_p9),
-					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none}) : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			} else {
-				return A2(
-					_Fresheyeball$elm_return$Return$map,
-					_user$project$Main$determineTimeDependentState(_p9),
-					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
+var _user$project$Main$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _user$project$Main$viewWheel(model),
+			_1: {
+				ctor: '::',
+				_0: _user$project$Main$viewWheelForm,
+				_1: {ctor: '[]'}
 			}
-		} else {
-			return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-		}
-	});
-var _user$project$Main$Unknown = {ctor: 'Unknown'};
-var _user$project$Main$init = function () {
-	var startingModel = {wheels: _krisajenkins$remotedata$RemoteData$Loading, selectedWheel: _user$project$JobWheel$simpleWheel, currentJobs: _user$project$Main$Unknown, timeOfNextChange: _user$project$Main$Unknown};
-	return {
-		ctor: '_Tuple2',
-		_0: startingModel,
-		_1: _user$project$Ports$loadWheels(
-			{ctor: '_Tuple0'})
-	};
-}();
+		});
+};
 var _user$project$Main$TimeReceived = function (a) {
 	return {ctor: 'TimeReceived', _0: a};
 };
@@ -14240,7 +14506,7 @@ var _user$project$Main$Nevermind = {ctor: 'Nevermind'};
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Main.Msg","aliases":{"Time.Time":{"type":"Float","args":[]}},"unions":{"Main.Msg":{"tags":{"Nevermind":[],"TimeReceived":["Time.Time"]},"args":[]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Main.Msg","aliases":{"Time.Time":{"type":"Float","args":[]}},"unions":{"Main.Msg":{"tags":{"SelectedWheelChanged":["String"],"Nevermind":[],"TimeReceived":["Time.Time"]},"args":[]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

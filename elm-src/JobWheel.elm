@@ -3,6 +3,7 @@ module JobWheel
         ( Job
         , JobWheel
         , ResponsiblePerson
+        , describeWheel
         , determineJobsAt
         , simpleWheel
         , timeOfNextChange
@@ -14,7 +15,8 @@ import Time
 simpleWheel : JobWheel
 simpleWheel =
     JobWheel
-        { timeCreated = 0
+        { description = "Example Job Wheel"
+        , timeCreated = 0
         , period = 4 * Time.second
         , origin = simplePeople
         , rotationDirection = Clockwise
@@ -44,6 +46,11 @@ angleOfRotation time (JobWheel record) =
                     periods
     in
     turns wheelTurns
+
+
+describeWheel : JobWheel -> String
+describeWheel (JobWheel record) =
+    record.description
 
 
 timeOfNextChange : Time.Time -> JobWheel -> Time.Time
@@ -165,7 +172,8 @@ type Direction
 
 type JobWheel
     = JobWheel
-        { timeCreated : Time.Time
+        { description: String
+        , timeCreated : Time.Time
         , period : Time.Time
         , origin : ResponsiblePeople
         , rotationDirection : Direction
