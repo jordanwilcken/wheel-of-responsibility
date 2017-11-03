@@ -16,7 +16,8 @@ view : Model -> Html.Html Msg
 view model =
     div []
         [ viewWheel model
-        , viewWheelForm
+        , hr [] []
+        , viewWheelForm model
         ]
 
 
@@ -66,9 +67,31 @@ wheelEntityToOptionEl (Entity id jobWheel) =
         [ Html.text (jobWheel |> JobWheel.describeWheel) ]
             
 
-viewWheelForm : Html.Html Msg
-viewWheelForm =
-    Html.text "This is the form"
+viewWheelForm : Model -> Html.Html Msg
+viewWheelForm model =
+    div []
+        [ p [ ] [ Html.text "Make a new Job Wheel" ]
+        , button [] [ Html.text "like the one above" ]
+        , br [ ] [ ]
+        , label [ for "people-count" ] [ Html.text "How many participants in your job wheel? (min is 2; max is 20)" ]
+        , input
+            [ Html.Attributes.id "people-count"
+            , value <| (model.wheelForm.participantCountValue |> countValueToString)
+            , onInput ParticipantCountInputChanged
+            ] []   
+        , viewParticipantInputs model.wheelForm
+        , Html.text "preview:"
+        , Html.text "this is the preview"
+        , Html.text "how often should participants rotate jobs"
+        , button [ ] [ Html.text "Looks good. Make it so." ]
+        ]
+
+
+viewParticipantInputs : WheelForm -> Html Msg
+viewParticipantInputs wheelForm =
+    div []
+        [ Html.text "look at us go!"
+        ]
 
 
 viewCurrentJobs : SvgConfig -> TimeDependentState (List JobWheel.ResponsiblePerson) -> Svg.Svg Msg
@@ -159,6 +182,105 @@ type alias Model =
     , selectedWheel : Entity JobWheel.JobWheel
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
     , timeOfNextChange : TimeDependentState Time.Time
+    , wheelForm : WheelForm
+    }
+
+
+changeParticipantCount : ParticipantCountValue -> Model -> Model
+changeParticipantCount count model =
+    let
+        ( participantInt, constrainedValue ) =
+            case count of
+                EmptyString ->
+                    ( 0, count )
+
+                MoreThanOne proposed ->
+                    if proposed > maxParticipants then
+                        ( maxParticipants, maxParticipants |> MoreThanOne )
+
+                    else
+                        ( proposed, count )
+
+        difference =
+            (Debug.log "should be constrained: " participantInt) - (countParticipants model.wheelForm)
+
+        updatedParticipants =
+            if difference > 0 then
+                List.repeat difference { name = "", job = "" }
+                    |> List.append model.wheelForm.participants
+                
+            else
+                model.wheelForm.participants
+                    |> List.take participantInt
+
+        originalWheelForm =
+            model.wheelForm
+
+        updatedWheelForm =
+            { originalWheelForm
+                | participants = updatedParticipants
+                , participantCountValue = constrainedValue
+            }
+            
+    in
+    { model | wheelForm = updatedWheelForm }
+
+
+maxParticipants : Int
+maxParticipants =
+    20
+
+
+type alias WheelForm =
+    { participants : List Participant
+    , participantCountValue : ParticipantCountValue
+    , maxParticipants : Int
+    }
+
+
+type ParticipantCountValue
+    = EmptyString
+    | MoreThanOne Int
+
+
+toParticipantCountValue : String -> Result String ParticipantCountValue
+toParticipantCountValue someString =
+    if someString == "" then
+        Ok EmptyString
+
+    else
+        someString
+            |> String.toInt
+            |> Result.andThen toMoreThanOne
+
+
+toMoreThanOne : Int -> Result String ParticipantCountValue
+toMoreThanOne someInt =
+    if someInt > 1 then
+        Ok <| MoreThanOne <| someInt
+
+    else
+        Err "gotta have more than one"
+
+
+countParticipants : WheelForm -> Int
+countParticipants wheelForm =
+    List.length wheelForm.participants
+
+
+countValueToString : ParticipantCountValue -> String
+countValueToString countValue =
+    case countValue of
+        MoreThanOne value ->
+            value |> toString
+
+        EmptyString ->
+            Debug.log "empty string is interesting" ""
+
+
+type alias Participant =
+    { name : String
+    , job : String
     }
 
 
@@ -220,11 +342,18 @@ determineTimeDependentState time model =
 init : ( Model, Cmd Msg )
 init =
     let
+        startingWheelForm =
+            { participants = [ ]
+            , maxParticipants = maxParticipants
+            , participantCountValue = EmptyString
+            }
+
         startingModel =
             { wheels = RemoteData.Loading
             , selectedWheel = Entity 0 JobWheel.simpleWheel
             , currentJobs = Unknown
             , timeOfNextChange = Unknown
+            , wheelForm = startingWheelForm
             }
     in
     ( startingModel, Ports.loadWheels () )
@@ -234,6 +363,7 @@ type Msg
     = Nevermind
     | TimeReceived Time.Time
     | SelectedWheelChanged String
+    | ParticipantCountInputChanged String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -265,6 +395,15 @@ update msg model =
                         |> Return.map (changeSelectedWheel wheel)
 
                 Err _->
+                    ( model, Cmd.none )
+
+        ParticipantCountInputChanged newValue ->
+            case newValue |> toParticipantCountValue of
+                Ok validValue ->
+                    ( model, Cmd.none )
+                        |> Return.map (changeParticipantCount validValue)
+
+                Err _ ->
                     ( model, Cmd.none )
 
         Nevermind ->
@@ -314,3 +453,12 @@ firstInList checkMatch someList =
 
         Nothing ->
             Err ""
+
+
+toZeroOrGreater : Int -> Result () Int
+toZeroOrGreater someInt =
+    if someInt >= 0 then
+        Ok someInt
+
+    else
+        Err ()

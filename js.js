@@ -14128,6 +14128,10 @@ var _user$project$Ports$saveWheel = _elm_lang$core$Native_Platform.outgoingPort(
 	});
 var _user$project$Ports$timeNow = _elm_lang$core$Native_Platform.incomingPort('timeNow', _elm_lang$core$Json_Decode$float);
 
+var _user$project$Main$toZeroOrGreater = function (someInt) {
+	return (_elm_lang$core$Native_Utils.cmp(someInt, 0) > -1) ? _elm_lang$core$Result$Ok(someInt) : _elm_lang$core$Result$Err(
+		{ctor: '_Tuple0'});
+};
 var _user$project$Main$firstInList = F2(
 	function (checkMatch, someList) {
 		firstInList:
@@ -14176,6 +14180,36 @@ var _user$project$Main$findWheel = F2(
 			return _elm_lang$core$Result$Err('don\'t have wheel list');
 		}
 	});
+var _user$project$Main$countValueToString = function (countValue) {
+	var _p7 = countValue;
+	if (_p7.ctor === 'MoreThanOne') {
+		return _elm_lang$core$Basics$toString(_p7._0);
+	} else {
+		return '';
+	}
+};
+var _user$project$Main$countParticipants = function (wheelForm) {
+	return _elm_lang$core$List$length(wheelForm.participants);
+};
+var _user$project$Main$maxParticipants = 20;
+var _user$project$Main$changeParticipantCount = F2(
+	function (count, model) {
+		var originalWheelForm = model.wheelForm;
+		var difference = count - _user$project$Main$countParticipants(model.wheelForm);
+		var updatedParticipants = (_elm_lang$core$Native_Utils.cmp(difference, 0) > 0) ? A2(
+			_elm_lang$core$List$append,
+			model.wheelForm.participants,
+			A2(
+				_elm_lang$core$List$repeat,
+				difference,
+				{name: '', job: ''})) : A2(_elm_lang$core$List$take, count, model.wheelForm.participants);
+		var updatedWheelForm = _elm_lang$core$Native_Utils.update(
+			originalWheelForm,
+			{participants: updatedParticipants});
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{wheelForm: updatedWheelForm});
+	});
 var _user$project$Main$viewJob = F3(
 	function (xVal, yVal, job) {
 		return A2(
@@ -14199,22 +14233,22 @@ var _user$project$Main$viewJob = F3(
 	});
 var _user$project$Main$viewCurrentJobs = F2(
 	function (svgConfig, timeDependentState) {
-		var _p7 = timeDependentState;
-		if (_p7.ctor === 'Known') {
-			var _p13 = _p7._0;
-			var peopleCount = _elm_lang$core$List$length(_p13);
+		var _p8 = timeDependentState;
+		if (_p8.ctor === 'Known') {
+			var _p14 = _p8._0;
+			var peopleCount = _elm_lang$core$List$length(_p14);
 			var yPositions = A2(_user$project$Main$getPositions, peopleCount, svgConfig.height);
 			var responsibilityX = 150;
 			var personX = '50';
 			var concatTextElements = F2(
-				function (_p8, svgList) {
-					var _p9 = _p8;
-					var _p12 = _p9._0;
-					var _p11 = _p9._1;
+				function (_p9, svgList) {
+					var _p10 = _p9;
+					var _p13 = _p10._0;
+					var _p12 = _p10._1;
 					var maybeJobTextElement = A2(
 						_elm_lang$core$Maybe$map,
-						A2(_user$project$Main$viewJob, responsibilityX, _p12),
-						_p11.job);
+						A2(_user$project$Main$viewJob, responsibilityX, _p13),
+						_p12.job);
 					var personTextElement = A2(
 						_elm_lang$svg$Svg$text_,
 						{
@@ -14223,24 +14257,24 @@ var _user$project$Main$viewCurrentJobs = F2(
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Attributes$y(
-									_elm_lang$core$Basics$toString(_p12)),
+									_elm_lang$core$Basics$toString(_p13)),
 								_1: {ctor: '[]'}
 							}
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$svg$Svg$text(_p11.name),
+							_0: _elm_lang$svg$Svg$text(_p12.name),
 							_1: {ctor: '[]'}
 						});
 					var toAppend = function () {
-						var _p10 = maybeJobTextElement;
-						if (_p10.ctor === 'Just') {
+						var _p11 = maybeJobTextElement;
+						if (_p11.ctor === 'Just') {
 							return {
 								ctor: '::',
 								_0: personTextElement,
 								_1: {
 									ctor: '::',
-									_0: _p10._0,
+									_0: _p11._0,
 									_1: {ctor: '[]'}
 								}
 							};
@@ -14265,7 +14299,7 @@ var _user$project$Main$viewCurrentJobs = F2(
 							return {ctor: '_Tuple2', _0: v0, _1: v1};
 						}),
 					yPositions,
-					_p13));
+					_p14));
 			return A2(
 				_elm_lang$svg$Svg$svg,
 				{
@@ -14316,21 +14350,30 @@ var _user$project$Main$viewCurrentJobs = F2(
 				});
 		}
 	});
-var _user$project$Main$viewWheelForm = _elm_lang$html$Html$text('This is the form');
-var _user$project$Main$wheelEntityToOptionEl = function (_p14) {
-	var _p15 = _p14;
+var _user$project$Main$viewParticipantInputs = function (wheelForm) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text('look at us go!'),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Main$wheelEntityToOptionEl = function (_p15) {
+	var _p16 = _p15;
 	return A2(
 		_elm_lang$html$Html$option,
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$value(
-				_elm_lang$core$Basics$toString(_p15._0)),
+				_elm_lang$core$Basics$toString(_p16._0)),
 			_1: {ctor: '[]'}
 		},
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html$text(
-				_user$project$JobWheel$describeWheel(_p15._1)),
+				_user$project$JobWheel$describeWheel(_p16._1)),
 			_1: {ctor: '[]'}
 		});
 };
@@ -14340,8 +14383,8 @@ var _user$project$Main$viewOptionsForWheels = function (model) {
 	};
 	var remoteOptionsForOtherWheels = A2(_krisajenkins$remotedata$RemoteData$map, wheelsToElements, model.wheels);
 	var optionCurrentlySelected = _user$project$Main$wheelEntityToOptionEl(model.selectedWheel);
-	var _p16 = remoteOptionsForOtherWheels;
-	if (_p16.ctor === 'Success') {
+	var _p17 = remoteOptionsForOtherWheels;
+	if (_p17.ctor === 'Success') {
 		return A2(
 			_elm_lang$core$List$append,
 			{
@@ -14349,7 +14392,7 @@ var _user$project$Main$viewOptionsForWheels = function (model) {
 				_0: optionCurrentlySelected,
 				_1: {ctor: '[]'}
 			},
-			_p16._0);
+			_p17._0);
 	} else {
 		return {
 			ctor: '::',
@@ -14362,10 +14405,32 @@ var _user$project$Main$SvgConfig = F2(
 	function (a, b) {
 		return {width: a, height: b};
 	});
-var _user$project$Main$Model = F4(
-	function (a, b, c, d) {
-		return {wheels: a, selectedWheel: b, currentJobs: c, timeOfNextChange: d};
+var _user$project$Main$Model = F5(
+	function (a, b, c, d, e) {
+		return {wheels: a, selectedWheel: b, currentJobs: c, timeOfNextChange: d, wheelForm: e};
 	});
+var _user$project$Main$WheelForm = F3(
+	function (a, b, c) {
+		return {participants: a, participantCountValue: b, maxParticipants: c};
+	});
+var _user$project$Main$Participant = F2(
+	function (a, b) {
+		return {name: a, job: b};
+	});
+var _user$project$Main$MoreThanOne = function (a) {
+	return {ctor: 'MoreThanOne', _0: a};
+};
+var _user$project$Main$toMoreThanOne = function (someInt) {
+	return (_elm_lang$core$Native_Utils.cmp(someInt, 1) > 0) ? _elm_lang$core$Result$Ok(
+		_user$project$Main$MoreThanOne(someInt)) : _elm_lang$core$Result$Err('gotta have more than one');
+};
+var _user$project$Main$EmptyString = {ctor: 'EmptyString'};
+var _user$project$Main$toParticipantCountValue = function (someString) {
+	return _elm_lang$core$Native_Utils.eq(someString, '') ? _elm_lang$core$Result$Ok(_user$project$Main$EmptyString) : A2(
+		_elm_lang$core$Result$andThen,
+		_user$project$Main$toMoreThanOne,
+		_elm_lang$core$String$toInt(someString));
+};
 var _user$project$Main$Entity = F2(
 	function (a, b) {
 		return {ctor: 'Entity', _0: a, _1: b};
@@ -14394,20 +14459,20 @@ var _user$project$Main$changeSelectedWheel = F2(
 	});
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p17 = msg;
-		switch (_p17.ctor) {
+		var _p18 = msg;
+		switch (_p18.ctor) {
 			case 'TimeReceived':
-				var _p19 = _p17._0;
-				var _p18 = model.timeOfNextChange;
-				if (_p18.ctor === 'Known') {
-					return (_elm_lang$core$Native_Utils.cmp(_p19, _p18._0) > -1) ? A2(
+				var _p20 = _p18._0;
+				var _p19 = model.timeOfNextChange;
+				if (_p19.ctor === 'Known') {
+					return (_elm_lang$core$Native_Utils.cmp(_p20, _p19._0) > -1) ? A2(
 						_Fresheyeball$elm_return$Return$map,
-						_user$project$Main$determineTimeDependentState(_p19),
+						_user$project$Main$determineTimeDependentState(_p20),
 						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none}) : {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
 					return A2(
 						_Fresheyeball$elm_return$Return$map,
-						_user$project$Main$determineTimeDependentState(_p19),
+						_user$project$Main$determineTimeDependentState(_p20),
 						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 				}
 			case 'SelectedWheelChanged':
@@ -14416,12 +14481,33 @@ var _user$project$Main$update = F2(
 					function (id) {
 						return A2(_user$project$Main$findWheel, id, model.wheels);
 					},
-					_elm_lang$core$String$toInt(_p17._0));
-				var _p20 = findWheelResult;
-				if (_p20.ctor === 'Ok') {
+					_elm_lang$core$String$toInt(_p18._0));
+				var _p21 = findWheelResult;
+				if (_p21.ctor === 'Ok') {
 					return A2(
 						_Fresheyeball$elm_return$Return$map,
-						_user$project$Main$changeSelectedWheel(_p20._0),
+						_user$project$Main$changeSelectedWheel(_p21._0),
+						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
+				} else {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				}
+			case 'ParticipantCountInputChanged':
+				var _p22 = _user$project$Main$toParticipantCountValue(_p18._0);
+				if (_p22.ctor === 'Ok') {
+					var proposed = function () {
+						var _p23 = _p22._0;
+						if (_p23.ctor === 'EmptyString') {
+							return 0;
+						} else {
+							return _p23._0;
+						}
+					}();
+					var constrained = (_elm_lang$core$Native_Utils.cmp(
+						A2(_elm_lang$core$Debug$log, 'proposed: ', proposed),
+						_user$project$Main$maxParticipants) > 0) ? _user$project$Main$maxParticipants : proposed;
+					return A2(
+						_Fresheyeball$elm_return$Return$map,
+						_user$project$Main$changeParticipantCount(constrained),
 						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 				} else {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -14431,11 +14517,17 @@ var _user$project$Main$update = F2(
 		}
 	});
 var _user$project$Main$init = function () {
+	var startingWheelForm = {
+		participants: {ctor: '[]'},
+		maxParticipants: _user$project$Main$maxParticipants,
+		participantCountValue: _user$project$Main$EmptyString
+	};
 	var startingModel = {
 		wheels: _krisajenkins$remotedata$RemoteData$Loading,
 		selectedWheel: A2(_user$project$Main$Entity, 0, _user$project$JobWheel$simpleWheel),
 		currentJobs: _user$project$Main$Unknown,
-		timeOfNextChange: _user$project$Main$Unknown
+		timeOfNextChange: _user$project$Main$Unknown,
+		wheelForm: startingWheelForm
 	};
 	return {
 		ctor: '_Tuple2',
@@ -14444,13 +14536,113 @@ var _user$project$Main$init = function () {
 			{ctor: '_Tuple0'})
 	};
 }();
+var _user$project$Main$ParticipantCountInputChanged = function (a) {
+	return {ctor: 'ParticipantCountInputChanged', _0: a};
+};
+var _user$project$Main$viewWheelForm = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$p,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Make a new Job Wheel'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$br,
+					{ctor: '[]'},
+					{ctor: '[]'}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$button,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('like the one above'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$label,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$for('people-count'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('How many participants in your job wheel?'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$input,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$id('people-count'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$value(
+											_user$project$Main$countValueToString(model.wheelForm.participantCountValue)),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$ParticipantCountInputChanged),
+											_1: {ctor: '[]'}
+										}
+									}
+								},
+								{ctor: '[]'}),
+							_1: {
+								ctor: '::',
+								_0: _user$project$Main$viewParticipantInputs(model.wheelForm),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('preview:'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('this is the preview'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('how often should participants rotate jobs'),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$button,
+													{ctor: '[]'},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Looks good. Make it so.'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+};
 var _user$project$Main$SelectedWheelChanged = function (a) {
 	return {ctor: 'SelectedWheelChanged', _0: a};
 };
 var _user$project$Main$viewWheel = function (model) {
-	var _p21 = _elm_lang$core$Basics$identity(model.selectedWheel);
-	var selectedId = _p21._0;
-	var selectedWheel = _p21._1;
+	var _p24 = _elm_lang$core$Basics$identity(model.selectedWheel);
+	var selectedId = _p24._0;
+	var selectedWheel = _p24._1;
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
@@ -14488,8 +14680,15 @@ var _user$project$Main$view = function (model) {
 			_0: _user$project$Main$viewWheel(model),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Main$viewWheelForm,
-				_1: {ctor: '[]'}
+				_0: A2(
+					_elm_lang$html$Html$hr,
+					{ctor: '[]'},
+					{ctor: '[]'}),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Main$viewWheelForm(model),
+					_1: {ctor: '[]'}
+				}
 			}
 		});
 };
@@ -14506,7 +14705,7 @@ var _user$project$Main$Nevermind = {ctor: 'Nevermind'};
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Main.Msg","aliases":{"Time.Time":{"type":"Float","args":[]}},"unions":{"Main.Msg":{"tags":{"SelectedWheelChanged":["String"],"Nevermind":[],"TimeReceived":["Time.Time"]},"args":[]}}},"versions":{"elm":"0.18.0"}});
+    _user$project$Main$main(Elm['Main'], 'Main', {"types":{"message":"Main.Msg","aliases":{"Time.Time":{"type":"Float","args":[]}},"unions":{"Main.Msg":{"tags":{"SelectedWheelChanged":["String"],"ParticipantCountInputChanged":["String"],"Nevermind":[],"TimeReceived":["Time.Time"]},"args":[]}}},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])
