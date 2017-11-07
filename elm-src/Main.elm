@@ -10,6 +10,7 @@ import Return
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Time
+import WheelForm
 
 
 view : Model -> Html.Html Msg
@@ -17,7 +18,7 @@ view model =
     div []
         [ viewWheel model
         , hr [] []
-        , viewWheelForm model
+        , (WheelForm.view model.wheelForm) |> Html.map WheelFormMsg
         ]
 
 
@@ -67,27 +68,7 @@ wheelEntityToOptionEl (Entity id jobWheel) =
         [ Html.text (jobWheel |> JobWheel.describeWheel) ]
             
 
-viewWheelForm : Model -> Html.Html Msg
-viewWheelForm model =
-    div []
-        [ p [ ] [ Html.text "Make a new Job Wheel" ]
-        , button [] [ Html.text "like the one above" ]
-        , br [ ] [ ]
-        , label [ for "people-count" ] [ Html.text "How many participants in your job wheel? (min is 2; max is 20)" ]
-        , input
-            [ Html.Attributes.id "people-count"
-            , value <| (model.wheelForm.participantCountValue |> countValueToString)
-            , onInput ParticipantCountInputChanged
-            ] []   
-        , viewParticipantInputs model.wheelForm
-        , Html.text "preview:"
-        , Html.text "this is the preview"
-        , Html.text "how often should participants rotate jobs"
-        , button [ ] [ Html.text "Looks good. Make it so." ]
-        ]
-
-
-viewParticipantInputs : WheelForm -> Html Msg
+viewParticipantInputs : WheelForm.WheelForm -> Html Msg
 viewParticipantInputs wheelForm =
     div []
         [ Html.text "look at us go!"
@@ -182,59 +163,7 @@ type alias Model =
     , selectedWheel : Entity JobWheel.JobWheel
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
     , timeOfNextChange : TimeDependentState Time.Time
-    , wheelForm : WheelForm
-    }
-
-
-changeParticipantCount : ParticipantCountValue -> Model -> Model
-changeParticipantCount count model =
-    let
-        ( participantInt, constrainedValue ) =
-            case count of
-                EmptyString ->
-                    ( 0, count )
-
-                MoreThanOne proposed ->
-                    if proposed > maxParticipants then
-                        ( maxParticipants, maxParticipants |> MoreThanOne )
-
-                    else
-                        ( proposed, count )
-
-        difference =
-            (Debug.log "should be constrained: " participantInt) - (countParticipants model.wheelForm)
-
-        updatedParticipants =
-            if difference > 0 then
-                List.repeat difference { name = "", job = "" }
-                    |> List.append model.wheelForm.participants
-                
-            else
-                model.wheelForm.participants
-                    |> List.take participantInt
-
-        originalWheelForm =
-            model.wheelForm
-
-        updatedWheelForm =
-            { originalWheelForm
-                | participants = updatedParticipants
-                , participantCountValue = constrainedValue
-            }
-            
-    in
-    { model | wheelForm = updatedWheelForm }
-
-
-maxParticipants : Int
-maxParticipants =
-    20
-
-
-type alias WheelForm =
-    { participants : List Participant
-    , participantCountValue : ParticipantCountValue
-    , maxParticipants : Int
+    , wheelForm : WheelForm.WheelForm
     }
 
 
@@ -261,11 +190,6 @@ toMoreThanOne someInt =
 
     else
         Err "gotta have more than one"
-
-
-countParticipants : WheelForm -> Int
-countParticipants wheelForm =
-    List.length wheelForm.participants
 
 
 countValueToString : ParticipantCountValue -> String
@@ -342,11 +266,9 @@ determineTimeDependentState time model =
 init : ( Model, Cmd Msg )
 init =
     let
-        startingWheelForm =
-            { participants = [ ]
-            , maxParticipants = maxParticipants
-            , participantCountValue = EmptyString
-            }
+        ( startingWheelForm, wheelFormCmd ) =
+            WheelForm.init
+                |> Return.mapCmd WheelFormMsg
 
         startingModel =
             { wheels = RemoteData.Loading
@@ -355,15 +277,21 @@ init =
             , timeOfNextChange = Unknown
             , wheelForm = startingWheelForm
             }
+
+        startingCmd =
+            Cmd.batch
+                [ Ports.loadWheels ()
+                , wheelFormCmd
+                ]
     in
-    ( startingModel, Ports.loadWheels () )
+    ( startingModel, startingCmd )
 
 
 type Msg
     = Nevermind
     | TimeReceived Time.Time
     | SelectedWheelChanged String
-    | ParticipantCountInputChanged String
+    | WheelFormMsg WheelForm.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -397,14 +325,10 @@ update msg model =
                 Err _->
                     ( model, Cmd.none )
 
-        ParticipantCountInputChanged newValue ->
-            case newValue |> toParticipantCountValue of
-                Ok validValue ->
-                    ( model, Cmd.none )
-                        |> Return.map (changeParticipantCount validValue)
-
-                Err _ ->
-                    ( model, Cmd.none )
+        WheelFormMsg wheelFormMsg ->
+            WheelForm.update wheelFormMsg model.wheelForm
+                |> Return.map (\updatedWheelForm -> { model | wheelForm = updatedWheelForm })
+                |> Return.mapCmd WheelFormMsg
 
         Nevermind ->
             ( model, Cmd.none )
