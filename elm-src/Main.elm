@@ -2,13 +2,16 @@ module Main exposing (main)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import JobWheel
+import Json.Decode as Decode
+import Json.Encode as Encode
 import Ports
 import RemoteData
 import Return
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Task
 import Time
 import WheelForm
 
@@ -18,7 +21,11 @@ view model =
     div []
         [ viewWheel model
         , hr [] []
+        , viewError model.error
         , (WheelForm.view model.wheelForm) |> Html.map WheelFormMsg
+        , button
+            [ onClick MakeCreateCmd ]
+            [ Html.text "Looks good. Make it so." ]
         ]
 
 
@@ -67,13 +74,6 @@ wheelEntityToOptionEl (Entity id jobWheel) =
         [ value (id |> toString) ] 
         [ Html.text (jobWheel |> JobWheel.describeWheel) ]
             
-
-viewParticipantInputs : WheelForm.WheelForm -> Html Msg
-viewParticipantInputs wheelForm =
-    div []
-        [ Html.text "look at us go!"
-        ]
-
 
 viewCurrentJobs : SvgConfig -> TimeDependentState (List JobWheel.ResponsiblePerson) -> Svg.Svg Msg
 viewCurrentJobs svgConfig timeDependentState =
@@ -154,6 +154,19 @@ viewJob xVal yVal job =
         [ Svg.text job.description ]
 
 
+viewError : Maybe String -> Html Msg
+viewError error =
+    let
+        textNode =
+            case error of
+                Just someString ->
+                    Html.text someString
+
+                Nothing ->
+                    Html.text ""
+    in
+    p [ Html.Attributes.class "error-message" ] [ textNode ]
+
 
 -- Model
 
@@ -164,7 +177,35 @@ type alias Model =
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
     , timeOfNextChange : TimeDependentState Time.Time
     , wheelForm : WheelForm.WheelForm
+    , error : Maybe String
     }
+
+
+addDistinctWheels : JobWheelList -> Model -> Model
+addDistinctWheels wheels model =
+    case model.wheels of
+        RemoteData.Success existingWheels ->
+            let
+                existingIds =
+                    List.map justTheId existingWheels
+
+                newAndDistinct =
+                    List.filter (\(Entity id jobWheel) -> not <| (List.member id existingIds)) wheels
+
+                updatedWheels =
+                    newAndDistinct 
+                        |> List.append existingWheels
+                        |> RemoteData.Success
+            in
+            { model | wheels = updatedWheels }
+
+        _ ->
+            { model | wheels = RemoteData.Success wheels }
+
+
+setError : String -> Model -> Model
+setError theError model =
+    { model | error = Just theError }
 
 
 type ParticipantCountValue
@@ -241,9 +282,24 @@ type Entity a =
     Entity Int a
 
 
+getNextId : List (Entity a) -> Int
+getNextId entities =
+    case List.head <| sortDescending <| List.map justTheId entities of
+        Just anId ->
+            anId + 1
+
+        Nothing ->
+            1
+
+
 justTheValue : Entity a -> a
 justTheValue (Entity id value) =
     value
+
+
+justTheId : Entity a -> Int
+justTheId (Entity id value) =
+    id
 
 
 type TimeDependentState a
@@ -271,20 +327,18 @@ init =
                 |> Return.mapCmd WheelFormMsg
 
         startingModel =
-            { wheels = RemoteData.Loading
+            { wheels = RemoteData.NotAsked
             , selectedWheel = Entity 0 JobWheel.simpleWheel
             , currentJobs = Unknown
             , timeOfNextChange = Unknown
             , wheelForm = startingWheelForm
+            , error = Nothing
             }
 
         startingCmd =
-            Cmd.batch
-                [ Ports.loadWheels ()
-                , wheelFormCmd
-                ]
+            wheelFormCmd
     in
-    ( startingModel, startingCmd )
+    ( startingModel, wheelFormCmd )
 
 
 type Msg
@@ -292,6 +346,10 @@ type Msg
     | TimeReceived Time.Time
     | SelectedWheelChanged String
     | WheelFormMsg WheelForm.Msg
+    | MakeCreateCmd
+    | MakeSaveCmd JobWheel.JobWheel
+    | WheelsReceived JobWheelList
+    | ErrorCreatingJobWheel String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -330,6 +388,48 @@ update msg model =
                 |> Return.map (\updatedWheelForm -> { model | wheelForm = updatedWheelForm })
                 |> Return.mapCmd WheelFormMsg
 
+        MakeCreateCmd ->
+            let
+                wheelResultToMsg wheelResult =
+                    case wheelResult of
+                        Ok jobWheel ->
+                            MakeSaveCmd jobWheel
+
+                        Err error ->
+                            Debug.log "create wheel error: " error
+                                |> always Nevermind
+                
+                makeJobWheel time =
+                    case JobWheel.makeJobWheel time (WheelForm.getFormData model.wheelForm) of
+                        Ok jobWheel ->
+                            Task.succeed jobWheel
+
+                        Err error ->
+                            Task.fail error
+
+                creationTask =
+                    Time.now
+                        |> Task.andThen makeJobWheel 
+            in
+            ( model, Cmd.none )
+                |> Return.command (Task.attempt wheelResultToMsg creationTask)
+
+        MakeSaveCmd jobWheel ->
+            let
+                encodedJobWheel =
+                    JobWheel.encode jobWheel
+            in
+            ( model, Cmd.none )
+                |> Return.command (Ports.saveWheelCmd encodedJobWheel)
+
+        WheelsReceived wheels ->
+            ( model, Cmd.none )
+                |> Return.map (addDistinctWheels wheels)
+
+        ErrorCreatingJobWheel error ->
+            ( model, Cmd.none )
+                |> Return.map (setError error)
+
         Nevermind ->
             ( model, Cmd.none )
 
@@ -339,8 +439,30 @@ update msg model =
 
 
 subscriptions model =
-    Ports.timeNow TimeReceived
+    Sub.batch
+        [ Time.every Time.second TimeReceived
+        , Ports.wheels wheelsJsonToMsg
+        ]
 
+
+wheelsJsonToMsg : Encode.Value -> Msg
+wheelsJsonToMsg json =
+    case Decode.decodeValue wheelsDecoder json of
+        Ok wheels ->
+            WheelsReceived wheels
+
+        Err error ->
+            Debug.log "decoding error: " error
+                |> always Nevermind
+
+
+wheelsDecoder : Decode.Decoder JobWheelList
+wheelsDecoder =
+    Decode.list <|
+        Decode.map2
+            Entity
+            (Decode.field "id" Decode.int)
+            JobWheel.jobWheelDecoder
 
 
 -- main
@@ -386,3 +508,16 @@ toZeroOrGreater someInt =
 
     else
         Err ()
+
+
+sortDescending : List comparable -> List comparable
+sortDescending someList =
+    someList
+        |> List.sortWith flippedComparison
+
+
+flippedComparison a b =
+    case compare a b of
+    LT -> GT
+    EQ -> EQ
+    GT -> LT

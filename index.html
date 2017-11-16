@@ -12,14 +12,20 @@
   <main id="elm-container">
   </main>
 
+  <script src="wheel-repo.js"></script>
   <script src="js.js"></script>
 
   <script>
         var elmApp = Elm.Main.embed(document.getElementById("elm-container"));
 
-        setInterval(function() {
-            elmApp.ports.timeNow.send(Date.now());
-        }, 1000);
+        elmApp.ports.saveWheelCmd.subscribe(function(jobWheel) {
+            jobWheel.id = wheelApp.wheelRepo.generateId();
+            wheelApp.wheelRepo.save(jobWheel);
+
+            elmApp.ports.wheels.send(wheelApp.wheelRepo.getAll());
+        });
+
+        elmApp.ports.wheels.send(wheelApp.wheelRepo.getAll());
   </script>
 </body>
 </html>

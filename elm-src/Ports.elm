@@ -1,13 +1,10 @@
-port module Ports exposing (loadWheels, saveWheel, timeNow)
+port module Ports exposing (saveWheelCmd, wheels)
 
 import Json.Encode as Encode
 import Time
 
 
-port loadWheels : () -> Cmd msg
+port saveWheelCmd : Encode.Value -> Cmd msg
 
 
-port saveWheel : Encode.Value -> Cmd msg
-
-
-port timeNow : (Time.Time -> msg) -> Sub msg
+port wheels : (Encode.Value -> msg) -> Sub msg

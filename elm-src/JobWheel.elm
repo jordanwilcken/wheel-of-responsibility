@@ -5,10 +5,16 @@ module JobWheel
         , ResponsiblePerson
         , describeWheel
         , determineJobsAt
+        , encode
+        , jobWheelDecoder
+        , makeJobWheel
         , simpleWheel
         , timeOfNextChange
         )
 
+import Json.Decode as Decode
+import Json.Encode as Encode
+import Regex
 import Time
 
 
@@ -21,6 +27,31 @@ simpleWheel =
         , origin = simplePeople
         , rotationDirection = Clockwise
         }
+
+
+makeJobWheel : Time.Time -> FormData -> Result String JobWheel
+makeJobWheel theTime formData =
+    let
+        constructor validDescription responsiblePeople =
+            JobWheel
+                { description = validDescription
+                , timeCreated = theTime
+                , period = (calculatePeriod formData.rotationInterval responsiblePeople)
+                , origin = responsiblePeople
+                , rotationDirection = Clockwise
+                }
+    in
+    Result.map2
+        constructor
+        (getValidDescription formData.description)
+        (getResponsiblePeople formData.participants)
+
+
+type alias FormData =
+    { description : String
+    , participants : List { name : String, job : String }
+    , rotationInterval : Time.Time
+    }
 
 
 simplePeople : ResponsiblePeople
@@ -170,6 +201,20 @@ type Direction
     | CounterClockwise
 
 
+directionDecoder : Decode.Decoder Direction
+directionDecoder =
+    let
+        stringToDirection someString =
+            if someString == "counterClockwise" then
+                CounterClockwise
+
+            else
+                Clockwise
+    in
+    Decode.string
+        |> Decode.map stringToDirection
+
+
 type JobWheel
     = JobWheel
         { description: String
@@ -180,11 +225,216 @@ type JobWheel
         }
 
 
+jobWheelDecoder : Decode.Decoder JobWheel
+jobWheelDecoder =
+    Decode.map5
+        (\description timeCreated period origin rotationDirection ->
+            JobWheel
+                { description = description
+                , timeCreated = timeCreated
+                , period = period
+                , origin = origin
+                , rotationDirection = rotationDirection
+                }
+        )
+        (Decode.field "description" Decode.string)
+        (Decode.field "timeCreated" Decode.float)
+        (Decode.field "period" Decode.float)
+        (Decode.field "origin" originDecoder)
+        (Decode.field "rotationDirection" directionDecoder)
+
+
+encode : JobWheel -> Encode.Value
+encode (JobWheel jobWheel) =
+    let
+        encodeJob : Maybe Job -> Encode.Value
+        encodeJob job =
+            case job of
+                Just aJob ->
+                    Encode.string aJob.description
+
+                Nothing ->
+                    Encode.string ""
+
+        encodePerson : ResponsiblePerson -> Encode.Value
+        encodePerson person =
+            Encode.object
+                [ ( "name", Encode.string person.name )
+                , ( "job", encodeJob person.job )
+                ]
+
+        encodeResponsiblePeople : ResponsiblePeople -> Encode.Value
+        encodeResponsiblePeople responsiblePeople =
+            responsiblePeople
+                |> listPeople
+                |> List.map encodePerson
+                |> Encode.list
+
+        encodeDirection : Direction -> Encode.Value
+        encodeDirection direction =
+            case direction of
+                Clockwise ->
+                    Encode.string "clockwise"
+
+                CounterClockwise ->
+                    Encode.string "counterClockwise"
+    in
+    Encode.object
+        [ ( "description", Encode.string jobWheel.description )
+        , ( "timeCreated", Encode.float jobWheel.timeCreated )
+        , ( "period", Encode.float jobWheel.period )
+        , ( "origin", encodeResponsiblePeople jobWheel.origin )
+        , ( "rotationDirection", encodeDirection jobWheel.rotationDirection )
+        ]
+
+
 type alias ResponsiblePeople =
     { first : ResponsiblePerson
     , middle : List ResponsiblePerson
     , last : ResponsiblePerson
     }
+
+
+originDecoder : Decode.Decoder ResponsiblePeople
+originDecoder =
+    let
+        makeResponsiblePeopleDecoder : List ResponsiblePerson -> Decode.Decoder ResponsiblePeople
+        makeResponsiblePeopleDecoder personList =
+            case toResponsiblePeople personList of
+                Ok responsiblePeople ->
+                    Decode.succeed responsiblePeople
+
+                Err error ->
+                    Decode.fail error
+    in
+    Decode.list responsiblePersonDecoder
+        |> Decode.andThen makeResponsiblePeopleDecoder
+
+
+responsiblePersonDecoder : Decode.Decoder ResponsiblePerson
+responsiblePersonDecoder =
+    Decode.map2
+        (ResponsiblePerson 42)
+            (Decode.field "name" Decode.string)
+            (Decode.field "job" jobDecoder)
+
+
+jobDecoder : Decode.Decoder (Maybe Job)
+jobDecoder =
+    let
+        stringToJob : String -> Maybe Job
+        stringToJob someString =
+            if String.length someString > 0 then
+                Just <| Job 42 someString
+            
+            else
+                Nothing
+    in
+    Decode.string
+        |> Decode.map stringToJob
+
+
+toResponsiblePeople : List ResponsiblePerson -> Result String ResponsiblePeople
+toResponsiblePeople personList =
+    let
+        first =
+            case List.head personList of
+                Just responsiblePerson ->
+                    Ok responsiblePerson
+
+                Nothing ->
+                    Err "Your job wheel needs more participants"
+
+        toTake =
+            (List.length personList) - 2
+
+        middle =
+            personList
+                |> List.drop 1
+                |> List.take toTake
+                |> Ok
+
+        last =
+            case getLast personList of
+                Just responsiblePerson ->
+                    Ok responsiblePerson
+
+                Nothing ->
+                    Err "Your job wheel needs more participants"
+            
+    in
+    Result.map3
+        ResponsiblePeople
+            first
+            middle
+            last
+
+
+getResponsiblePeople : List { name : String, job : String } -> Result String ResponsiblePeople
+getResponsiblePeople participants =
+    let
+        --toResponsibleList : List (Result String ResponsiblePerson) -> Result String (List ResponsiblePerson)
+        --toResponsibleList results =
+        --    let
+        --        persons =
+        --            results |> List.filterMap Result.toMaybe
+        --    in
+        --    if (List.length persons) == (List.length results) then
+        --        Ok persons
+
+        --    else
+        --        Err
+
+        toResponsibleList : List (Result String ResponsiblePerson) -> Result String (List ResponsiblePerson)
+        toResponsibleList results =
+            case List.head results of
+                Nothing ->
+                    Ok [ ]
+
+                Just resultItem ->
+                    case resultItem of
+                        Ok responsiblePerson ->
+                           (toResponsibleList (List.drop 1 results)) |> Result.map ((::) responsiblePerson)  
+
+                        Err error ->
+                            Err error
+                        
+                    
+    in
+    participants
+        |> List.map toResponsiblePerson
+        |> toResponsibleList
+        |> Result.andThen toResponsiblePeople
+
+
+toResponsiblePerson : { name : String, job : String } -> Result String ResponsiblePerson
+toResponsiblePerson record =
+    let
+        name =
+            if allWhitespace record.name then
+                Err "You can't have names consisting only of white space."
+
+            else
+                Ok record.name
+
+        job =
+            if allWhitespace record.job then
+                Nothing
+
+            else
+                Just (Job 42 record.job)
+    in
+    name |> Result.map (\theName -> ResponsiblePerson 42 theName job)
+    
+
+allWhitespace : String -> Bool
+allWhitespace someString =
+    Regex.contains (Regex.regex "^\\s+$") someString
+
+
+calculatePeriod : Time.Time -> ResponsiblePeople -> Time.Time
+calculatePeriod rotationInterval responsiblePeople =
+    rotationInterval * ((countPeople responsiblePeople) |> toFloat)   
 
 
 countPeople : ResponsiblePeople -> Int
@@ -306,3 +556,15 @@ firstToLast someList =
 
         Nothing ->
             someList
+
+
+-- details
+
+
+getValidDescription : String -> Result String String
+getValidDescription proposedDescription =
+    if allWhitespace proposedDescription then
+        Err "You can't have a description that is all white space."
+
+    else
+        Ok proposedDescription
