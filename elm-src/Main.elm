@@ -34,6 +34,14 @@ viewWheel model =
     let
         (Entity selectedId selectedWheel) =
             identity model.selectedWheel
+
+        jobsSvg =
+            case model.displayMode of
+                RealTime ->
+                    viewRealTime { width = 800, height = 800 } (model.selectedWheel |> justTheValue)
+
+                Static ->
+                    viewCurrentJobs { width = 800, height = 800 } model.currentJobs
     in
     div []
         [ Html.select
@@ -41,8 +49,19 @@ viewWheel model =
             , value (selectedId |> toString)
             ]
             (viewOptionsForWheels model)
-        , viewCurrentJobs { width = 800, height = 800 } model.currentJobs
+        , Html.label [ for "show-realtime" ] [ Html.text "display in real time" ]
+        , Html.input
+            [ Html.Attributes.id "show-realtime"
+            , Html.Attributes.type_ "checkbox"
+            , onClick ToggleDisplayMode
+            ] [ ]
+        , jobsSvg
         ]
+
+
+viewRealTime : SvgConfig -> JobWheel.JobWheel -> Svg Msg
+viewRealTime svgConfig model =
+    Svg.text <| "angle of rotation is 14 degrees. Always."
 
 
 viewOptionsForWheels : Model -> List (Html.Html Msg)
@@ -178,6 +197,7 @@ type alias Model =
     , timeOfNextChange : TimeDependentState Time.Time
     , wheelForm : WheelForm.WheelForm
     , error : Maybe String
+    , displayMode : DisplayMode
     }
 
 
@@ -206,6 +226,11 @@ addDistinctWheels wheels model =
 setError : String -> Model -> Model
 setError theError model =
     { model | error = Just theError }
+
+
+type DisplayMode
+    = RealTime
+    | Static
 
 
 type ParticipantCountValue
@@ -333,6 +358,7 @@ init =
             , timeOfNextChange = Unknown
             , wheelForm = startingWheelForm
             , error = Nothing
+            , displayMode = Static
             }
 
         startingCmd =
@@ -350,11 +376,24 @@ type Msg
     | MakeSaveCmd JobWheel.JobWheel
     | WheelsReceived JobWheelList
     | ErrorCreatingJobWheel String
+    | ToggleDisplayMode
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        ToggleDisplayMode ->
+            let
+                newDisplayMode =
+                    case model.displayMode of
+                        RealTime ->
+                            Static
+
+                        Static ->
+                            RealTime
+            in
+            ( { model | displayMode = newDisplayMode }, Cmd.none )
+
         TimeReceived currentTime ->
             case model.timeOfNextChange of
                 Known time ->
