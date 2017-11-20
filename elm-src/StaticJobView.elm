@@ -1,6 +1,6 @@
 module StaticJobView exposing (simpleView, Person, SvgConfig)
 
-import Html
+import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (x, y)
 

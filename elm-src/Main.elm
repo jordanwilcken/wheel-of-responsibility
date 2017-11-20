@@ -14,6 +14,7 @@ import Svg.Attributes exposing (..)
 import Task
 import Time
 import WheelForm
+import WheelView
 
 
 view : Model -> Html.Html Msg
@@ -38,7 +39,13 @@ viewWheel model =
         jobsSvg =
             case model.displayMode of
                 RealTime ->
-                    viewRealTime { width = 800, height = 800 } (model.selectedWheel |> justTheValue)
+                    case model.wheelOrientation of
+                        Known wheelOrientation ->
+                            WheelView.viewWheel { width = 800, height = 800 } wheelOrientation
+                                |> Html.map (always WheelViewMsg)
+
+                        Unknown ->
+                            Html.text "computing..."
 
                 Static ->
                     viewCurrentJobs { width = 800, height = 800 } model.currentJobs
@@ -57,11 +64,6 @@ viewWheel model =
             ] [ ]
         , jobsSvg
         ]
-
-
-viewRealTime : SvgConfig -> JobWheel.JobWheel -> Svg Msg
-viewRealTime svgConfig model =
-    Svg.text <| "angle of rotation is 14 degrees. Always."
 
 
 viewOptionsForWheels : Model -> List (Html.Html Msg)
@@ -193,12 +195,18 @@ viewError error =
 type alias Model =
     { wheels : RemoteData.RemoteData String JobWheelList
     , selectedWheel : Entity JobWheel.JobWheel
+    , wheelOrientation : TimeDependentState ( List Person, Float )
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
     , timeOfNextChange : TimeDependentState Time.Time
     , wheelForm : WheelForm.WheelForm
     , error : Maybe String
     , displayMode : DisplayMode
     }
+
+
+changeWheelOrientation : ( List Person, Float ) -> Model -> Model
+changeWheelOrientation orientation model =
+    { model | wheelOrientation = Known orientation }
 
 
 addDistinctWheels : JobWheelList -> Model -> Model
@@ -354,6 +362,7 @@ init =
         startingModel =
             { wheels = RemoteData.NotAsked
             , selectedWheel = Entity 0 JobWheel.simpleWheel
+            , wheelOrientation = Unknown
             , currentJobs = Unknown
             , timeOfNextChange = Unknown
             , wheelForm = startingWheelForm
@@ -377,6 +386,7 @@ type Msg
     | WheelsReceived JobWheelList
     | ErrorCreatingJobWheel String
     | ToggleDisplayMode
+    | WheelViewMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -395,17 +405,28 @@ update msg model =
             ( { model | displayMode = newDisplayMode }, Cmd.none )
 
         TimeReceived currentTime ->
+            let
+                wheelOrientation =
+                    case model.displayMode of
+                        Static ->
+                            JobWheel.getStaticOrientation currentTime (model.selectedWheel |> justTheValue)
+
+                        RealTime ->
+                            JobWheel.getRealTimeOrientation currentTime (model.selectedWheel |> justTheValue)
+            in
             case model.timeOfNextChange of
                 Known time ->
                     if currentTime >= time then
                         ( model, Cmd.none )
                             |> Return.map (determineTimeDependentState currentTime)
+                            |> Return.map (changeWheelOrientation wheelOrientation)
                     else
                         ( model, Cmd.none )
 
                 Unknown ->
                     ( model, Cmd.none )
                         |> Return.map (determineTimeDependentState currentTime)
+                        |> Return.map (changeWheelOrientation wheelOrientation)
 
         SelectedWheelChanged newValue ->
             let
@@ -468,6 +489,9 @@ update msg model =
         ErrorCreatingJobWheel error ->
             ( model, Cmd.none )
                 |> Return.map (setError error)
+
+        WheelViewMsg ->
+            ( model, Cmd.none )
 
         Nevermind ->
             ( model, Cmd.none )
@@ -560,3 +584,9 @@ flippedComparison a b =
     LT -> GT
     EQ -> EQ
     GT -> LT
+
+
+type alias Person =
+    { name : String
+    , job : Maybe String
+    }

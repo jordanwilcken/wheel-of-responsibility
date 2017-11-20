@@ -2,6 +2,8 @@ module JobWheel
     exposing
         ( Job
         , JobWheel
+        , getRealTimeOrientation
+        , getStaticOrientation
         , ResponsiblePerson
         , describeWheel
         , determineJobsAt
@@ -16,6 +18,27 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Regex
 import Time
+
+
+getRealTimeOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Float )
+getRealTimeOrientation time jobWheel =
+    case jobWheel of
+        JobWheel stuff ->
+            ( stuff.origin |> listThem, angleOfRotation time jobWheel )
+
+
+getStaticOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Float )
+getStaticOrientation time jobWheel =
+    let
+        angle =
+            changesThisTurn time jobWheel
+                |> floor
+                |> toFloat
+                |> (*) (rotationPerChange jobWheel)
+    in
+    case jobWheel of
+        JobWheel record ->
+            ( record.origin |> listThem, angle )
 
 
 simpleWheel : JobWheel
@@ -103,6 +126,11 @@ changesThisTurn time jobWheel =
             turnDecimal time jobWheel
     in
     (changesPerTurn jobWheel |> toFloat) * currentTurnDecimal
+
+
+rotationPerChange : JobWheel -> Float
+rotationPerChange jobWheel =
+    360 / (changesPerTurn jobWheel|> toFloat)
 
 
 changesPerTurn : JobWheel -> Int
@@ -194,6 +222,14 @@ getNegativeDecimal theFloat =
 listPeople : ResponsiblePeople -> List ResponsiblePerson
 listPeople people =
     people.first :: List.append people.middle [ people.last ]
+
+
+listThem : ResponsiblePeople -> List { name : String, job : Maybe String }
+listThem responsiblePeople =
+    responsiblePeople
+        |> listPeople
+        |> List.map
+            (\person -> { name = person.name, job = Maybe.map .description person.job })
 
 
 type Direction
