@@ -15509,11 +15509,7 @@ var _user$project$WheelView$toSection = F2(
 				_1: {ctor: '[]'}
 			});
 	});
-var _user$project$WheelView$divideOuterCircle = F2(
-	function (strings, circle) {
-		return A2(_elm_lang$core$List$map, _elm_lang$svg$Svg$text, strings);
-	});
-var _user$project$WheelView$divideInnerCircle = F2(
+var _user$project$WheelView$divideCircle = F2(
 	function (strings, circle) {
 		var angleToTransform = function (angle) {
 			var centerString = A2(
@@ -15535,7 +15531,7 @@ var _user$project$WheelView$divideInnerCircle = F2(
 		};
 		var stringY = _elm_lang$core$Basics$toString(
 			circle.cy - _elm_lang$core$Basics$floor(
-				0.8 * _elm_lang$core$Basics$toFloat(circle.r)));
+				0.85 * _elm_lang$core$Basics$toFloat(circle.r)));
 		var radiusFloat = _elm_lang$core$Basics$toFloat(circle.r);
 		var lineAngle = (_elm_lang$core$Basics$pi / _elm_lang$core$Basics$toFloat(
 			_elm_lang$core$List$length(strings))) + (_elm_lang$core$Basics$pi / 2);
@@ -15594,13 +15590,13 @@ var _user$project$WheelView$divideInnerCircle = F2(
 										_0: _elm_lang$svg$Svg_Attributes$x2(
 											_elm_lang$core$Basics$toString(
 												circle.cx + _elm_lang$core$Basics$floor(
-													(radiusFloat * _elm_lang$core$Basics$cos(lineAngle)) * 0.96))),
+													radiusFloat * _elm_lang$core$Basics$cos(lineAngle)))),
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$svg$Svg_Attributes$y2(
 												_elm_lang$core$Basics$toString(
 													circle.cy - _elm_lang$core$Basics$floor(
-														(radiusFloat * _elm_lang$core$Basics$sin(lineAngle)) * 0.96))),
+														radiusFloat * _elm_lang$core$Basics$sin(lineAngle)))),
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$svg$Svg_Attributes$stroke('black'),
@@ -15649,10 +15645,7 @@ var _user$project$WheelView$viewWheel = F2(
 		var outerCircle = {cx: center.x, cy: center.y, r: ((45 * svgConfig.width) / 100) | 0};
 		var innerCircle = _elm_lang$core$Native_Utils.update(
 			outerCircle,
-			{
-				r: _elm_lang$core$Basics$floor(
-					_elm_lang$core$Basics$toFloat(outerCircle.r) * 0.8)
-			});
+			{r: ((outerCircle.r * 80) / 100) | 0});
 		return A2(
 			_elm_lang$svg$Svg$svg,
 			{
@@ -15687,8 +15680,7 @@ var _user$project$WheelView$viewWheel = F2(
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$svg$Svg_Attributes$r(
-												_elm_lang$core$Basics$toString(
-													0.45 * _elm_lang$core$Basics$toFloat(svgConfig.width))),
+												_elm_lang$core$Basics$toString(outerCircle.r)),
 											_1: {ctor: '[]'}
 										}
 									}
@@ -15713,12 +15705,15 @@ var _user$project$WheelView$viewWheel = F2(
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$svg$Svg_Attributes$r(
-													_elm_lang$core$Basics$toString(
-														0.35 * _elm_lang$core$Basics$toFloat(svgConfig.width))),
+													_elm_lang$core$Basics$toString(innerCircle.r)),
 												_1: {
 													ctor: '::',
-													_0: _elm_lang$svg$Svg_Attributes$stroke('pink'),
-													_1: {ctor: '[]'}
+													_0: _elm_lang$svg$Svg_Attributes$stroke('black'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$svg$Svg_Attributes$strokeWidth('4'),
+														_1: {ctor: '[]'}
+													}
 												}
 											}
 										}
@@ -15730,10 +15725,10 @@ var _user$project$WheelView$viewWheel = F2(
 					},
 					_1: {
 						ctor: '::',
-						_0: A2(_user$project$WheelView$divideOuterCircle, names, outerCircle),
+						_0: A2(_user$project$WheelView$divideCircle, names, outerCircle),
 						_1: {
 							ctor: '::',
-							_0: A2(_user$project$WheelView$divideInnerCircle, jobs, innerCircle),
+							_0: A2(_user$project$WheelView$divideCircle, jobs, innerCircle),
 							_1: {ctor: '[]'}
 						}
 					}

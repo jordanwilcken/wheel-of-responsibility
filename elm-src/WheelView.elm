@@ -34,7 +34,7 @@ viewWheel svgConfig ( people, angle ) =
             }
 
         innerCircle =
-            { outerCircle | r = ((outerCircle.r |> toFloat) * 0.8) |> floor }
+            { outerCircle | r = (outerCircle.r * 80) // 100  }
     in
     svg
         [ svgConfig.width |> toString |> Svg.Attributes.width
@@ -45,23 +45,24 @@ viewWheel svgConfig ( people, angle ) =
                   [ cx <| (center.x |> toString)
                   , cy <| (center.y |> toString)
                   , fill "tan"
-                  , r (0.45 * (svgConfig.width |> toFloat) |> toString)
+                  , r (outerCircle.r |> toString)
                   ] [ ]
               ,  circle
                  [ cx <| (center.x |> toString)
                  , cy <| (center.y |> toString)
                  , fill "lightblue"
-                 , r (0.35 * (svgConfig.width |> toFloat) |> toString)
-                 , stroke "pink"
+                 , r (innerCircle.r |> toString)
+                 , stroke "black"
+                 , strokeWidth "4"
                  ] [ ]
               ]
-            , (divideOuterCircle names outerCircle)
-            , (divideInnerCircle jobs innerCircle)
+            , (divideCircle names outerCircle)
+            , (divideCircle jobs innerCircle)
             ]
 
 
-divideInnerCircle : List String -> { cx : Int, cy: Int, r: Int } -> List (Svg.Svg Never)
-divideInnerCircle strings circle =
+divideCircle : List String -> { cx : Int, cy: Int, r: Int } -> List (Svg.Svg Never)
+divideCircle strings circle =
     let
         lineAngle =
             (pi / (List.length strings |> toFloat)) + (pi / 2)
@@ -70,7 +71,7 @@ divideInnerCircle strings circle =
             circle.r |> toFloat
 
         stringY =
-            circle.cy - (0.8 * (circle.r |> toFloat) |> floor) |> toString
+            circle.cy - (0.85 * (circle.r |> toFloat) |> floor) |> toString
 
         angleToTransform : Float -> String
         angleToTransform angle =
@@ -106,8 +107,8 @@ divideInnerCircle strings circle =
             , line
                 [ x1 (circle.cx |> toString)
                 , y1 (circle.cy |> toString)
-                , x2 (circle.cx + ((radiusFloat * cos lineAngle * 0.96) |> floor) |> toString)
-                , y2 (circle.cy - ((radiusFloat * sin lineAngle * 0.96) |> floor) |> toString)
+                , x2 (circle.cx + ((radiusFloat * cos lineAngle) |> floor) |> toString)
+                , y2 (circle.cy - ((radiusFloat * sin lineAngle) |> floor) |> toString)
                 , stroke "black"
                 , strokeWidth "4"
                 , transform transformValue
@@ -117,11 +118,6 @@ divideInnerCircle strings circle =
     strings
         |> List.indexedMap toElements
         |> List.concat
-        
-
-divideOuterCircle : List String -> { cx : Int, cy: Int, r: Int } -> List (Svg.Svg Never)
-divideOuterCircle strings circle =
-    List.map Svg.text strings
 
 
 toSection : SvgConfig -> Person -> Html.Html Never
