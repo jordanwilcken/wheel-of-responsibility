@@ -2,10 +2,11 @@ module WheelView exposing (viewWheel)
 
 import Html exposing (Html)
 import Svg exposing (..)
+import Angle
 import Svg.Attributes exposing (..)
 
 
-viewWheel : SvgConfig -> ( List Person, Float ) -> Html.Html Never
+viewWheel : SvgConfig -> ( List Person, Angle ) -> Html.Html Never
 viewWheel svgConfig ( people, angle ) =
     let
         center =
@@ -28,13 +29,17 @@ viewWheel svgConfig ( people, angle ) =
             List.map .name people
 
         outerCircle =
-            { cx = center.x
+            { angle = Angle.fromDegrees 0
+            , cx = center.x
             , cy = center.y
             , r = (45 * svgConfig.width) // 100
             }
 
         innerCircle =
-            { outerCircle | r = (outerCircle.r * 80) // 100  }
+            { outerCircle
+                | r = (outerCircle.r * 80) // 100
+                , angle = angle
+            }
     in
     svg
         [ svgConfig.width |> toString |> Svg.Attributes.width
@@ -47,7 +52,9 @@ viewWheel svgConfig ( people, angle ) =
                   , fill "tan"
                   , r (outerCircle.r |> toString)
                   ] [ ]
-              ,  circle
+              ]
+            , (divideCircle names outerCircle)
+            , [ circle
                  [ cx <| (center.x |> toString)
                  , cy <| (center.y |> toString)
                  , fill "lightblue"
@@ -56,12 +63,11 @@ viewWheel svgConfig ( people, angle ) =
                  , strokeWidth "4"
                  ] [ ]
               ]
-            , (divideCircle names outerCircle)
             , (divideCircle jobs innerCircle)
             ]
 
 
-divideCircle : List String -> { cx : Int, cy: Int, r: Int } -> List (Svg.Svg Never)
+divideCircle : List String -> { angle : Angle , cx : Int, cy: Int, r: Int } -> List (Svg.Svg Never)
 divideCircle strings circle =
     let
         lineAngle =
@@ -93,6 +99,7 @@ divideCircle strings circle =
                 angle =
                     360 / (List.length strings |> toFloat)
                         |> (*) (index |> toFloat)
+                        |> (+) (circle.angle |> Angle.inDegrees)
 
                 transformValue =
                     angle |> angleToTransform
@@ -151,3 +158,6 @@ type alias SvgConfig =
     { width : Int
     , height : Int
     }
+
+type alias Angle =
+    Angle.Angle

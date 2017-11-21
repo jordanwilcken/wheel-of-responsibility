@@ -14,6 +14,7 @@ module JobWheel
         , timeOfNextChange
         )
 
+import FloatOps
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Regex
@@ -115,7 +116,7 @@ timeOfNextChange time jobWheel =
 timeSinceLastChange : Time.Time -> JobWheel -> Time.Time
 timeSinceLastChange time jobWheel =
     changesThisTurn time jobWheel
-        |> justTheDecimalPart
+        |> FloatOps.justTheDecimalPart
         |> (*) (changeInterval jobWheel)
 
 
@@ -130,7 +131,7 @@ changesThisTurn time jobWheel =
 
 rotationPerChange : JobWheel -> Float
 rotationPerChange jobWheel =
-    360 / (changesPerTurn jobWheel|> toFloat)
+    (2 * pi) / (changesPerTurn jobWheel|> toFloat)
 
 
 changesPerTurn : JobWheel -> Int
@@ -506,22 +507,6 @@ type alias Job =
 -- details
 
 
-justTheDecimalPart : Float -> Float
-justTheDecimalPart someFloat =
-    let
-        negateIfNecessary : Float -> Float
-        negateIfNecessary theDecimalPart =
-            if someFloat < 0 then
-                negate theDecimalPart
-            else
-                theDecimalPart
-    in
-    someFloat
-        |> abs
-        |> floor
-        |> toFloat
-        |> (-) someFloat
-        |> negateIfNecessary
 
 
 shiftList : Int -> List a -> List a

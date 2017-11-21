@@ -1,5 +1,7 @@
 module Main exposing (main)
 
+import Angle
+import FloatOps
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -41,14 +43,31 @@ viewWheel model =
                 RealTime ->
                     case model.wheelOrientation of
                         Known wheelOrientation ->
-                            WheelView.viewWheel { width = 800, height = 800 } wheelOrientation
-                                |> Html.map (always WheelViewMsg)
+                            let
+                                wheelView =
+                                    WheelView.viewWheel
+                                        { width = 800, height = 800 }
+                                        ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
+                            in
+                            wheelView |> Html.map (always WheelViewMsg)
 
                         Unknown ->
                             Html.text "computing..."
 
                 Static ->
-                    viewCurrentJobs { width = 800, height = 800 } model.currentJobs
+                    case model.wheelOrientation of
+                        Known wheelOrientation ->
+                            let
+                                wheelView =
+                                    WheelView.viewWheel
+                                        { width = 800, height = 800 }
+                                        ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
+                            in
+                            wheelView |> Html.map (always WheelViewMsg)
+
+                        Unknown ->
+                            Html.text "computing..."
+                    --viewCurrentJobs { width = 800, height = 800 } model.currentJobs
     in
     div []
         [ Html.select
@@ -195,7 +214,7 @@ viewError error =
 type alias Model =
     { wheels : RemoteData.RemoteData String JobWheelList
     , selectedWheel : Entity JobWheel.JobWheel
-    , wheelOrientation : TimeDependentState ( List Person, Float )
+    , wheelOrientation : TimeDependentState WheelOrientation
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
     , timeOfNextChange : TimeDependentState Time.Time
     , wheelForm : WheelForm.WheelForm
@@ -204,7 +223,14 @@ type alias Model =
     }
 
 
-changeWheelOrientation : ( List Person, Float ) -> Model -> Model
+type alias WheelOrientation =
+    { personList : List Person
+    , angleInDegrees : Float
+    , angleInRadians : Float
+    }
+
+
+changeWheelOrientation : WheelOrientation -> Model -> Model
 changeWheelOrientation orientation model =
     { model | wheelOrientation = Known orientation }
 
@@ -406,27 +432,52 @@ update msg model =
 
         TimeReceived currentTime ->
             let
-                wheelOrientation =
+                timeForAChange : Bool
+                timeForAChange =
                     case model.displayMode of
                         Static ->
-                            JobWheel.getStaticOrientation currentTime (model.selectedWheel |> justTheValue)
+                            case model.timeOfNextChange of
+                                Known time ->
+                                    if currentTime >= time then
+                                        True
+
+                                    else
+                                        False
+
+                                Unknown ->
+                                    True
 
                         RealTime ->
-                            JobWheel.getRealTimeOrientation currentTime (model.selectedWheel |> justTheValue)
+                            True
             in
-            case model.timeOfNextChange of
-                Known time ->
-                    if currentTime >= time then
-                        ( model, Cmd.none )
-                            |> Return.map (determineTimeDependentState currentTime)
-                            |> Return.map (changeWheelOrientation wheelOrientation)
-                    else
-                        ( model, Cmd.none )
+            if timeForAChange then
+                let
+                    ( personList, angle ) =
+                        case model.displayMode of
+                            Static ->
+                                JobWheel.getStaticOrientation currentTime (model.selectedWheel |> justTheValue)
 
-                Unknown ->
-                    ( model, Cmd.none )
-                        |> Return.map (determineTimeDependentState currentTime)
-                        |> Return.map (changeWheelOrientation wheelOrientation)
+                            RealTime ->
+                                JobWheel.getRealTimeOrientation currentTime (model.selectedWheel |> justTheValue)
+
+                    reducedTurns =
+                        angle / (2 * pi)
+                            |> FloatOps.justTheDecimalPart
+                    
+                    reducedDegrees =
+                        reducedTurns * 360
+
+                    wheelOrientation =
+                        { personList = personList
+                        , angleInDegrees = reducedDegrees
+                        , angleInRadians = degrees reducedDegrees
+                        }
+                in
+                ( model, Cmd.none )
+                    |> Return.map (determineTimeDependentState currentTime)
+                    |> Return.map (changeWheelOrientation wheelOrientation)
+            else
+                ( model, Cmd.none )
 
         SelectedWheelChanged newValue ->
             let
