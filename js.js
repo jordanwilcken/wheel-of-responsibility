@@ -15509,6 +15509,62 @@ var _user$project$WheelForm$view = function (_p27) {
 		});
 };
 
+var _user$project$SvgSpace$getEquilateralPointsBasedOnTop = F2(
+	function (sideLength, topPoint) {
+		var sideLengthFloat = _elm_lang$core$Basics$toFloat(sideLength);
+		var sharedY = topPoint.y + _elm_lang$core$Basics$floor(
+			sideLengthFloat * _elm_lang$core$Basics$sin(
+				_elm_lang$core$Basics$degrees(60)));
+		var point2 = {
+			x: topPoint.x - _elm_lang$core$Basics$floor(sideLengthFloat / 2),
+			y: sharedY
+		};
+		var point3 = {
+			x: topPoint.x + _elm_lang$core$Basics$floor(sideLengthFloat / 2),
+			y: sharedY
+		};
+		return {
+			ctor: '::',
+			_0: topPoint,
+			_1: {
+				ctor: '::',
+				_0: point2,
+				_1: {
+					ctor: '::',
+					_0: point3,
+					_1: {ctor: '[]'}
+				}
+			}
+		};
+	});
+var _user$project$SvgSpace$Point = F2(
+	function (a, b) {
+		return {x: a, y: b};
+	});
+
+var _user$project$WheelView$joinStringsWith = F2(
+	function (joinString, stringList) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			F2(
+				function (item, aggregate) {
+					return A2(
+						_elm_lang$core$Basics_ops['++'],
+						aggregate,
+						A2(_elm_lang$core$Basics_ops['++'], joinString, item));
+				}),
+			'',
+			stringList);
+	});
+var _user$project$WheelView$stringifyPoint = function (somePoint) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_elm_lang$core$Basics$toString(somePoint.x),
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			',',
+			_elm_lang$core$Basics$toString(somePoint.y)));
+};
 var _user$project$WheelView$toSection = F2(
 	function (svgConfig, person) {
 		var jobText = function () {
@@ -15809,6 +15865,17 @@ var _user$project$WheelView$drawHands = F2(
 			_elm_lang$core$List$length(strings))) + (_elm_lang$core$Basics$pi / 2);
 		var toElements = F2(
 			function (index, someString) {
+				var sideLength = 20;
+				var pointsString = A2(
+					_user$project$WheelView$joinStringsWith,
+					' ',
+					A2(
+						_elm_lang$core$List$map,
+						_user$project$WheelView$stringifyPoint,
+						A2(
+							_user$project$SvgSpace$getEquilateralPointsBasedOnTop,
+							sideLength,
+							{x: circle.cx, y: circle.cy - circle.r})));
 				var sectionAngle = 360 / _elm_lang$core$Basics$toFloat(
 					_elm_lang$core$List$length(strings));
 				var angle = A2(
@@ -15857,46 +15924,65 @@ var _user$project$WheelView$drawHands = F2(
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$svg$Svg$line,
+							_elm_lang$svg$Svg$polygon,
 							{
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$x1(
-									_elm_lang$core$Basics$toString(circle.cx)),
+								_0: _elm_lang$svg$Svg_Attributes$points(pointsString),
 								_1: {
 									ctor: '::',
-									_0: _elm_lang$svg$Svg_Attributes$y1(
-										_elm_lang$core$Basics$toString(circle.cy)),
+									_0: _elm_lang$svg$Svg_Attributes$fill('black'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$svg$Svg_Attributes$x2(
-											_elm_lang$core$Basics$toString(
-												circle.cx + _elm_lang$core$Basics$floor(
-													radiusFloat * _elm_lang$core$Basics$cos(lineAngle)))),
+										_0: _elm_lang$svg$Svg_Attributes$transform(textTransformValue),
+										_1: {ctor: '[]'}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$svg$Svg$line,
+								{
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Attributes$x1(
+										_elm_lang$core$Basics$toString(circle.cx)),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$y1(
+											_elm_lang$core$Basics$toString(circle.cy)),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$svg$Svg_Attributes$y2(
+											_0: _elm_lang$svg$Svg_Attributes$x2(
 												_elm_lang$core$Basics$toString(
-													circle.cy - _elm_lang$core$Basics$floor(
-														radiusFloat * _elm_lang$core$Basics$sin(lineAngle)))),
+													circle.cx + _elm_lang$core$Basics$floor(
+														radiusFloat * _elm_lang$core$Basics$cos(lineAngle)))),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$svg$Svg_Attributes$stroke('black'),
+												_0: _elm_lang$svg$Svg_Attributes$y2(
+													_elm_lang$core$Basics$toString(
+														circle.cy - _elm_lang$core$Basics$floor(
+															radiusFloat * _elm_lang$core$Basics$sin(lineAngle)))),
 												_1: {
 													ctor: '::',
-													_0: _elm_lang$svg$Svg_Attributes$strokeWidth('4'),
+													_0: _elm_lang$svg$Svg_Attributes$stroke('black'),
 													_1: {
 														ctor: '::',
-														_0: _elm_lang$svg$Svg_Attributes$transform(transformValue),
-														_1: {ctor: '[]'}
+														_0: _elm_lang$svg$Svg_Attributes$strokeWidth('4'),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$svg$Svg_Attributes$transform(transformValue),
+															_1: {ctor: '[]'}
+														}
 													}
 												}
 											}
 										}
 									}
-								}
-							},
-							{ctor: '[]'}),
-						_1: {ctor: '[]'}
+								},
+								{ctor: '[]'}),
+							_1: {ctor: '[]'}
+						}
 					}
 				};
 			});

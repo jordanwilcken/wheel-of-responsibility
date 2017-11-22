@@ -2,6 +2,7 @@ module WheelView exposing (viewAsClock, viewWheel)
 
 import Html exposing (Html)
 import Svg exposing (..)
+import SvgSpace
 import Angle
 import Svg.Attributes exposing (..)
 
@@ -109,6 +110,14 @@ drawHands strings circle =
 
                 textTransformValue =
                     (angle - (sectionAngle / 2)) |> angleToTransform
+
+                sideLength =
+                    20
+
+                pointsString =
+                    SvgSpace.getEquilateralPointsBasedOnTop sideLength { x = circle.cx, y = (circle.cy - circle.r) }
+                        |> List.map stringifyPoint
+                        |> joinStringsWith " "
             in
             [ text_
                 [ x (circle.cx |> toString)
@@ -117,6 +126,11 @@ drawHands strings circle =
                 , transform textTransformValue
                 ]
                 [ text someString ]
+            , polygon
+                [ points pointsString
+                , fill "black"
+                , transform textTransformValue
+                ] [ ]
             , line
                 [ x1 (circle.cx |> toString)
                 , y1 (circle.cy |> toString)
@@ -287,3 +301,13 @@ type alias SvgConfig =
 
 type alias Angle =
     Angle.Angle
+
+
+stringifyPoint : { x : Int, y : Int } -> String
+stringifyPoint somePoint =
+    (toString somePoint.x) ++ "," ++ (toString somePoint.y)
+
+
+joinStringsWith : String -> List String -> String
+joinStringsWith joinString stringList =
+    List.foldl (\item aggregate -> aggregate ++ joinString ++ item) "" stringList
