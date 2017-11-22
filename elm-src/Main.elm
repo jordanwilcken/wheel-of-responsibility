@@ -45,7 +45,7 @@ viewWheel model =
                         Known wheelOrientation ->
                             let
                                 wheelView =
-                                    WheelView.viewWheel
+                                    WheelView.viewAsClock
                                         { width = 800, height = 800 }
                                         ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
                             in
@@ -461,7 +461,7 @@ update msg model =
                                 JobWheel.getRealTimeOrientation currentTime (model.selectedWheel |> justTheValue)
 
                     reducedTurns =
-                        angle / (2 * pi)
+                        Angle.inRadians angle / (2 * pi)
                             |> FloatOps.justTheDecimalPart
                     
                     reducedDegrees =

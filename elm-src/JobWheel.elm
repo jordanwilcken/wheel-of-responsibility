@@ -14,6 +14,7 @@ module JobWheel
         , timeOfNextChange
         )
 
+import Angle
 import FloatOps
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -21,25 +22,25 @@ import Regex
 import Time
 
 
-getRealTimeOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Float )
+getRealTimeOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Angle.AngleOfRotation )
 getRealTimeOrientation time jobWheel =
     case jobWheel of
         JobWheel stuff ->
             ( stuff.origin |> listThem, angleOfRotation time jobWheel )
 
 
-getStaticOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Float )
+getStaticOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Angle.AngleOfRotation )
 getStaticOrientation time jobWheel =
     let
         angle =
             changesThisTurn time jobWheel
                 |> floor
                 |> toFloat
-                |> (*) (rotationPerChange jobWheel)
+                |> (*) (rotationPerChange jobWheel |> Angle.inRadians)
     in
     case jobWheel of
         JobWheel record ->
-            ( record.origin |> listThem, angle )
+            ( record.origin |> listThem, angle |> Angle.fromRadians )
 
 
 simpleWheel : JobWheel
@@ -86,7 +87,7 @@ simplePeople =
     }
 
 
-angleOfRotation : Time.Time -> JobWheel -> Float
+angleOfRotation : Time.Time -> JobWheel -> Angle.AngleOfRotation
 angleOfRotation time (JobWheel record) =
     let
         periods =
@@ -101,6 +102,7 @@ angleOfRotation time (JobWheel record) =
                     periods
     in
     turns wheelTurns
+        |> Angle.fromRadians
 
 
 describeWheel : JobWheel -> String
@@ -129,9 +131,18 @@ changesThisTurn time jobWheel =
     (changesPerTurn jobWheel |> toFloat) * currentTurnDecimal
 
 
-rotationPerChange : JobWheel -> Float
-rotationPerChange jobWheel =
-    (2 * pi) / (changesPerTurn jobWheel|> toFloat)
+rotationPerChange : JobWheel -> Angle.AngleOfRotation
+rotationPerChange (JobWheel jobWheel) =
+    let
+        angle =
+            (2 * pi) / (changesPerTurn (JobWheel jobWheel) |> toFloat)
+    in
+    case jobWheel.rotationDirection of
+        Clockwise ->
+            negate angle |> Angle.fromRadians
+
+        CounterClockwise ->
+            angle |> Angle.fromRadians
 
 
 changesPerTurn : JobWheel -> Int

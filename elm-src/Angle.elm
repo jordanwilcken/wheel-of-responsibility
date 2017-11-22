@@ -1,9 +1,17 @@
-module Angle exposing (Angle, fromDegrees, fromRadians, inDegrees)
+module Angle exposing (Angle, AngleOfRotation, fromDegrees, fromRadians, inDegrees, inRadians)
 
 
 --for simplicity's sake, let's just say that it's degrees under the hood
 type Angle =
     Angle Float
+
+
+{- What is the difference between an Angle and an AngleOfRotation?
+   Angle doesn't concern itself with orientation.
+   AngleOfRotation is positive in the counter clockwise direction.
+-}
+type alias AngleOfRotation =
+    Angle
 
 
 fromDegrees : Float -> Angle
@@ -18,5 +26,11 @@ fromRadians radiansFloat =
 
 
 inDegrees : Angle -> Float
-inDegrees (Angle degrees) =
-    degrees
+inDegrees (Angle theDegrees) =
+    theDegrees
+
+
+inRadians : Angle -> Float
+inRadians (Angle theDegrees) =
+    degrees theDegrees
+    

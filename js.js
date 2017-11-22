@@ -13983,9 +13983,13 @@ var _krisajenkins$remotedata$RemoteData$update = F2(
 		}
 	});
 
-var _user$project$Angle$inDegrees = function (_p0) {
+var _user$project$Angle$inRadians = function (_p0) {
 	var _p1 = _p0;
-	return _p1._0;
+	return _elm_lang$core$Basics$degrees(_p1._0);
+};
+var _user$project$Angle$inDegrees = function (_p2) {
+	var _p3 = _p2;
+	return _p3._0;
 };
 var _user$project$Angle$Angle = function (a) {
 	return {ctor: 'Angle', _0: a};
@@ -14259,10 +14263,6 @@ var _user$project$JobWheel$changesPerTurn = function (_p13) {
 	var _p14 = _p13;
 	return _user$project$JobWheel$countPeople(_p14._0.origin);
 };
-var _user$project$JobWheel$rotationPerChange = function (jobWheel) {
-	return (2 * _elm_lang$core$Basics$pi) / _elm_lang$core$Basics$toFloat(
-		_user$project$JobWheel$changesPerTurn(jobWheel));
-};
 var _user$project$JobWheel$changesThisTurn = F2(
 	function (time, jobWheel) {
 		var currentTurnDecimal = A2(_user$project$JobWheel$turnDecimal, time, jobWheel);
@@ -14301,32 +14301,15 @@ var _user$project$JobWheel$angleOfRotation = F2(
 				return periods;
 			}
 		}();
-		return _elm_lang$core$Basics$turns(wheelTurns);
+		return _user$project$Angle$fromRadians(
+			_elm_lang$core$Basics$turns(wheelTurns));
 	});
-var _user$project$JobWheel$getStaticOrientation = F2(
+var _user$project$JobWheel$getRealTimeOrientation = F2(
 	function (time, jobWheel) {
-		var angle = A2(
-			F2(
-				function (x, y) {
-					return x * y;
-				}),
-			_user$project$JobWheel$rotationPerChange(jobWheel),
-			_elm_lang$core$Basics$toFloat(
-				_elm_lang$core$Basics$floor(
-					A2(_user$project$JobWheel$changesThisTurn, time, jobWheel))));
 		var _p21 = jobWheel;
 		return {
 			ctor: '_Tuple2',
 			_0: _user$project$JobWheel$listThem(_p21._0.origin),
-			_1: angle
-		};
-	});
-var _user$project$JobWheel$getRealTimeOrientation = F2(
-	function (time, jobWheel) {
-		var _p22 = jobWheel;
-		return {
-			ctor: '_Tuple2',
-			_0: _user$project$JobWheel$listThem(_p22._0.origin),
 			_1: A2(_user$project$JobWheel$angleOfRotation, time, jobWheel)
 		};
 	});
@@ -14340,9 +14323,9 @@ var _user$project$JobWheel$ResponsiblePeople = F3(
 	});
 var _user$project$JobWheel$toResponsiblePeople = function (personList) {
 	var last = function () {
-		var _p23 = _user$project$JobWheel$getLast(personList);
-		if (_p23.ctor === 'Just') {
-			return _elm_lang$core$Result$Ok(_p23._0);
+		var _p22 = _user$project$JobWheel$getLast(personList);
+		if (_p22.ctor === 'Just') {
+			return _elm_lang$core$Result$Ok(_p22._0);
 		} else {
 			return _elm_lang$core$Result$Err('Your job wheel needs more participants');
 		}
@@ -14354,9 +14337,9 @@ var _user$project$JobWheel$toResponsiblePeople = function (personList) {
 			toTake,
 			A2(_elm_lang$core$List$drop, 1, personList)));
 	var first = function () {
-		var _p24 = _elm_lang$core$List$head(personList);
-		if (_p24.ctor === 'Just') {
-			return _elm_lang$core$Result$Ok(_p24._0);
+		var _p23 = _elm_lang$core$List$head(personList);
+		if (_p23.ctor === 'Just') {
+			return _elm_lang$core$Result$Ok(_p23._0);
 		} else {
 			return _elm_lang$core$Result$Err('Your job wheel needs more participants');
 		}
@@ -14441,11 +14424,11 @@ var _user$project$JobWheel$responsiblePersonDecoder = A3(
 	A2(_elm_lang$core$Json_Decode$field, 'job', _user$project$JobWheel$jobDecoder));
 var _user$project$JobWheel$originDecoder = function () {
 	var makeResponsiblePeopleDecoder = function (personList) {
-		var _p25 = _user$project$JobWheel$toResponsiblePeople(personList);
-		if (_p25.ctor === 'Ok') {
-			return _elm_lang$core$Json_Decode$succeed(_p25._0);
+		var _p24 = _user$project$JobWheel$toResponsiblePeople(personList);
+		if (_p24.ctor === 'Ok') {
+			return _elm_lang$core$Json_Decode$succeed(_p24._0);
 		} else {
-			return _elm_lang$core$Json_Decode$fail(_p25._0);
+			return _elm_lang$core$Json_Decode$fail(_p24._0);
 		}
 	};
 	return A2(
@@ -14466,23 +14449,23 @@ var _user$project$JobWheel$toResponsiblePerson = function (record) {
 };
 var _user$project$JobWheel$getResponsiblePeople = function (participants) {
 	var toResponsibleList = function (results) {
-		var _p26 = _elm_lang$core$List$head(results);
-		if (_p26.ctor === 'Nothing') {
+		var _p25 = _elm_lang$core$List$head(results);
+		if (_p25.ctor === 'Nothing') {
 			return _elm_lang$core$Result$Ok(
 				{ctor: '[]'});
 		} else {
-			var _p27 = _p26._0;
-			if (_p27.ctor === 'Ok') {
+			var _p26 = _p25._0;
+			if (_p26.ctor === 'Ok') {
 				return A2(
 					_elm_lang$core$Result$map,
 					F2(
 						function (x, y) {
 							return {ctor: '::', _0: x, _1: y};
-						})(_p27._0),
+						})(_p26._0),
 					toResponsibleList(
 						A2(_elm_lang$core$List$drop, 1, results)));
 			} else {
-				return _elm_lang$core$Result$Err(_p27._0);
+				return _elm_lang$core$Result$Err(_p26._0);
 			}
 		}
 	};
@@ -14524,18 +14507,51 @@ var _user$project$JobWheel$makeJobWheel = F2(
 			_user$project$JobWheel$getValidDescription(formData.description),
 			_user$project$JobWheel$getResponsiblePeople(formData.participants));
 	});
+var _user$project$JobWheel$rotationPerChange = function (_p27) {
+	var _p28 = _p27;
+	var _p30 = _p28._0;
+	var angle = (2 * _elm_lang$core$Basics$pi) / _elm_lang$core$Basics$toFloat(
+		_user$project$JobWheel$changesPerTurn(
+			_user$project$JobWheel$JobWheel(_p30)));
+	var _p29 = _p30.rotationDirection;
+	if (_p29.ctor === 'Clockwise') {
+		return _user$project$Angle$fromRadians(
+			_elm_lang$core$Basics$negate(angle));
+	} else {
+		return _user$project$Angle$fromRadians(angle);
+	}
+};
+var _user$project$JobWheel$getStaticOrientation = F2(
+	function (time, jobWheel) {
+		var angle = A2(
+			F2(
+				function (x, y) {
+					return x * y;
+				}),
+			_user$project$Angle$inRadians(
+				_user$project$JobWheel$rotationPerChange(jobWheel)),
+			_elm_lang$core$Basics$toFloat(
+				_elm_lang$core$Basics$floor(
+					A2(_user$project$JobWheel$changesThisTurn, time, jobWheel))));
+		var _p31 = jobWheel;
+		return {
+			ctor: '_Tuple2',
+			_0: _user$project$JobWheel$listThem(_p31._0.origin),
+			_1: _user$project$Angle$fromRadians(angle)
+		};
+	});
 var _user$project$JobWheel$determineJobsAt = F2(
-	function (time, _p28) {
-		var _p29 = _p28;
-		var _p30 = _p29._0;
+	function (time, _p32) {
+		var _p33 = _p32;
+		var _p34 = _p33._0;
 		var theTurnDecimal = A2(
 			_user$project$JobWheel$turnDecimal,
 			time,
-			_user$project$JobWheel$JobWheel(_p30));
-		var jobSwitchesPerTurn = _user$project$JobWheel$countPeople(_p30.origin);
+			_user$project$JobWheel$JobWheel(_p34));
+		var jobSwitchesPerTurn = _user$project$JobWheel$countPeople(_p34.origin);
 		var jobSwitches = _elm_lang$core$Basics$toFloat(jobSwitchesPerTurn) * theTurnDecimal;
 		var switchesRounded = (_elm_lang$core$Native_Utils.cmp(jobSwitches, 0) > -1) ? _elm_lang$core$Basics$floor(jobSwitches) : _elm_lang$core$Basics$ceiling(jobSwitches);
-		var personList = A2(_user$project$JobWheel$rotateJobsNTimes, switchesRounded, _p30.origin);
+		var personList = A2(_user$project$JobWheel$rotateJobsNTimes, switchesRounded, _p34.origin);
 		return personList;
 	});
 var _user$project$JobWheel$jobWheelDecoder = A6(
@@ -15557,7 +15573,8 @@ var _user$project$WheelView$divideCircle = F2(
 						function (x, y) {
 							return x + y;
 						}),
-					_user$project$Angle$inDegrees(circle.angle),
+					_elm_lang$core$Basics$negate(
+						_user$project$Angle$inDegrees(circle.angleOfRotation)),
 					A2(
 						F2(
 							function (x, y) {
@@ -15664,14 +15681,14 @@ var _user$project$WheelView$viewWheel = F2(
 		var jobs = A2(_elm_lang$core$List$map, jobDescription, _p4);
 		var center = {x: (svgConfig.width / 2) | 0, y: (svgConfig.height / 2) | 0};
 		var outerCircle = {
-			angle: _user$project$Angle$fromDegrees(0),
+			angleOfRotation: _user$project$Angle$fromDegrees(0),
 			cx: center.x,
 			cy: center.y,
 			r: ((45 * svgConfig.width) / 100) | 0
 		};
 		var innerCircle = _elm_lang$core$Native_Utils.update(
 			outerCircle,
-			{r: ((outerCircle.r * 80) / 100) | 0, angle: _p2._1});
+			{r: ((outerCircle.r * 80) / 100) | 0, angleOfRotation: _p2._1});
 		return A2(
 			_elm_lang$svg$Svg$svg,
 			{
@@ -15758,6 +15775,247 @@ var _user$project$WheelView$viewWheel = F2(
 							_1: {
 								ctor: '::',
 								_0: A2(_user$project$WheelView$divideCircle, jobs, innerCircle),
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}));
+	});
+var _user$project$WheelView$drawHands = F2(
+	function (strings, circle) {
+		var angleToTransform = function (angle) {
+			var centerString = A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(circle.cx),
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					' ',
+					_elm_lang$core$Basics$toString(circle.cy)));
+			var angleString = _elm_lang$core$Basics$toString(angle);
+			var values = A2(
+				_elm_lang$core$Basics_ops['++'],
+				angleString,
+				A2(_elm_lang$core$Basics_ops['++'], ' ', centerString));
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'rotate(',
+				A2(_elm_lang$core$Basics_ops['++'], values, ')'));
+		};
+		var stringY = _elm_lang$core$Basics$toString(
+			circle.cy - _elm_lang$core$Basics$floor(
+				0.7 * _elm_lang$core$Basics$toFloat(circle.r)));
+		var radiusFloat = _elm_lang$core$Basics$toFloat(circle.r);
+		var lineAngle = (_elm_lang$core$Basics$pi / _elm_lang$core$Basics$toFloat(
+			_elm_lang$core$List$length(strings))) + (_elm_lang$core$Basics$pi / 2);
+		var toElements = F2(
+			function (index, someString) {
+				var sectionAngle = 360 / _elm_lang$core$Basics$toFloat(
+					_elm_lang$core$List$length(strings));
+				var angle = A2(
+					F2(
+						function (x, y) {
+							return x + y;
+						}),
+					_elm_lang$core$Basics$negate(
+						_user$project$Angle$inDegrees(circle.angleOfRotation)),
+					A2(
+						F2(
+							function (x, y) {
+								return x * y;
+							}),
+						_elm_lang$core$Basics$toFloat(index),
+						sectionAngle));
+				var transformValue = angleToTransform(angle);
+				var textTransformValue = angleToTransform(angle - (sectionAngle / 2));
+				return {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$svg$Svg$text_,
+						{
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$x(
+								_elm_lang$core$Basics$toString(circle.cx)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$y(stringY),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Attributes$textAnchor('middle'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$transform(textTransformValue),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$svg$Svg$text(someString),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$svg$Svg$line,
+							{
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$x1(
+									_elm_lang$core$Basics$toString(circle.cx)),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Attributes$y1(
+										_elm_lang$core$Basics$toString(circle.cy)),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$x2(
+											_elm_lang$core$Basics$toString(
+												circle.cx + _elm_lang$core$Basics$floor(
+													radiusFloat * _elm_lang$core$Basics$cos(lineAngle)))),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$svg$Svg_Attributes$y2(
+												_elm_lang$core$Basics$toString(
+													circle.cy - _elm_lang$core$Basics$floor(
+														radiusFloat * _elm_lang$core$Basics$sin(lineAngle)))),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$svg$Svg_Attributes$stroke('black'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$svg$Svg_Attributes$strokeWidth('4'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$svg$Svg_Attributes$transform(transformValue),
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {ctor: '[]'}
+					}
+				};
+			});
+		return _elm_lang$core$List$concat(
+			A2(_elm_lang$core$List$indexedMap, toElements, strings));
+	});
+var _user$project$WheelView$viewAsClock = F2(
+	function (svgConfig, _p5) {
+		var _p6 = _p5;
+		var _p8 = _p6._0;
+		var names = A2(
+			_elm_lang$core$List$map,
+			function (_) {
+				return _.name;
+			},
+			_p8);
+		var jobDescription = function (person) {
+			var _p7 = person.job;
+			if (_p7.ctor === 'Just') {
+				return _p7._0;
+			} else {
+				return '';
+			}
+		};
+		var jobs = A2(_elm_lang$core$List$map, jobDescription, _p8);
+		var center = {x: (svgConfig.width / 2) | 0, y: (svgConfig.height / 2) | 0};
+		var outerCircle = {
+			angleOfRotation: _user$project$Angle$fromDegrees(0),
+			cx: center.x,
+			cy: center.y,
+			r: ((45 * svgConfig.width) / 100) | 0
+		};
+		var innerCircle = {angleOfRotation: _p6._1, cx: center.x, cy: center.y, r: ((outerCircle.r * 80) / 100) | 0};
+		return A2(
+			_elm_lang$svg$Svg$svg,
+			{
+				ctor: '::',
+				_0: _elm_lang$svg$Svg_Attributes$width(
+					_elm_lang$core$Basics$toString(svgConfig.width)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$svg$Svg_Attributes$height(
+						_elm_lang$core$Basics$toString(svgConfig.height)),
+					_1: {ctor: '[]'}
+				}
+			},
+			_elm_lang$core$List$concat(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$svg$Svg$circle,
+							{
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$cx(
+									_elm_lang$core$Basics$toString(center.x)),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Attributes$cy(
+										_elm_lang$core$Basics$toString(center.y)),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$fill('tan'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$svg$Svg_Attributes$r(
+												_elm_lang$core$Basics$toString(outerCircle.r)),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {ctor: '[]'}
+					},
+					_1: {
+						ctor: '::',
+						_0: A2(_user$project$WheelView$divideCircle, names, outerCircle),
+						_1: {
+							ctor: '::',
+							_0: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$svg$Svg$circle,
+									{
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$cx(
+											_elm_lang$core$Basics$toString(center.x)),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$svg$Svg_Attributes$cy(
+												_elm_lang$core$Basics$toString(center.y)),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$svg$Svg_Attributes$fill('lightblue'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$svg$Svg_Attributes$r(
+														_elm_lang$core$Basics$toString(innerCircle.r)),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$svg$Svg_Attributes$stroke('black'),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$svg$Svg_Attributes$strokeWidth('4'),
+															_1: {ctor: '[]'}
+														}
+													}
+												}
+											}
+										}
+									},
+									{ctor: '[]'}),
+								_1: {ctor: '[]'}
+							},
+							_1: {
+								ctor: '::',
+								_0: A2(_user$project$WheelView$drawHands, jobs, innerCircle),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -16218,7 +16476,7 @@ var _user$project$Main$viewWheel = function (model) {
 			if (_p29.ctor === 'Known') {
 				var _p30 = _p29._0;
 				var wheelView = A2(
-					_user$project$WheelView$viewWheel,
+					_user$project$WheelView$viewAsClock,
 					{width: 800, height: 800},
 					{
 						ctor: '_Tuple2',
@@ -16414,7 +16672,8 @@ var _user$project$Main$update = F2(
 					}();
 					var personList = _p38._0;
 					var angle = _p38._1;
-					var reducedTurns = _user$project$FloatOps$justTheDecimalPart(angle / (2 * _elm_lang$core$Basics$pi));
+					var reducedTurns = _user$project$FloatOps$justTheDecimalPart(
+						_user$project$Angle$inRadians(angle) / (2 * _elm_lang$core$Basics$pi));
 					var reducedDegrees = reducedTurns * 360;
 					var wheelOrientation = {
 						personList: personList,
