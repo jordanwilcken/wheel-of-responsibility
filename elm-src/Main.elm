@@ -32,6 +32,11 @@ view model =
         ]
 
 
+svgConfig : SvgConfig
+svgConfig =
+    { class = "wheel-view", width = 800, height = 800 }
+
+
 viewWheel : Model -> Html.Html Msg
 viewWheel model =
     let
@@ -46,13 +51,13 @@ viewWheel model =
                             let
                                 wheelView =
                                     WheelView.viewAsClock
-                                        { width = 800, height = 800 }
+                                        svgConfig
                                         ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
                             in
                             wheelView |> Html.map (always WheelViewMsg)
 
                         Unknown ->
-                            Html.text "computing..."
+                            viewLoading svgConfig
 
                 Static ->
                     case model.wheelOrientation of
@@ -60,28 +65,44 @@ viewWheel model =
                             let
                                 wheelView =
                                     WheelView.viewWheel
-                                        { width = 800, height = 800 }
+                                        { class = "wheel-view", width = 800, height = 800 }
                                         ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
                             in
                             wheelView |> Html.map (always WheelViewMsg)
 
                         Unknown ->
-                            Html.text "computing..."
-                    --viewCurrentJobs { width = 800, height = 800 } model.currentJobs
+                            viewLoading svgConfig
     in
     div []
-        [ Html.select
-            [ onInput SelectedWheelChanged
+        [ jobsSvg
+        , Html.select
+            [ Html.Attributes.class "row"
+            , onInput SelectedWheelChanged
             , value (selectedId |> toString)
             ]
             (viewOptionsForWheels model)
-        , Html.label [ for "show-realtime" ] [ Html.text "display in real time" ]
         , Html.input
             [ Html.Attributes.id "show-realtime"
             , Html.Attributes.type_ "checkbox"
             , onClick ToggleDisplayMode
             ] [ ]
-        , jobsSvg
+        , Html.label [ for "show-realtime" ] [ Html.text "display in real time" ]
+        ]
+
+
+viewLoading : SvgConfig -> Html Msg
+viewLoading svgConfig =
+    svg
+        [ Svg.Attributes.width (svgConfig.width |> toString)
+        , Svg.Attributes.height (svgConfig.height |> toString)
+        ]
+        [ text_
+            [ fontSize "30"
+            , x ((svgConfig.width // 2) |> toString)
+            , y ((svgConfig.height // 2) |> toString)
+            , textAnchor "middle"
+            ]
+            [ Svg.text "Loading" ]
         ]
 
 
@@ -180,7 +201,8 @@ viewCurrentJobs svgConfig timeDependentState =
 
 
 type alias SvgConfig =
-    { width : Int
+    { class : String
+    , width : Int
     , height : Int
     }
 

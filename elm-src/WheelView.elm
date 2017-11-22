@@ -1,4 +1,4 @@
-module WheelView exposing (viewAsClock, viewWheel)
+module WheelView exposing (SvgConfig, viewAsClock, viewWheel)
 
 import Html exposing (Html)
 import Svg exposing (..)
@@ -43,7 +43,8 @@ viewAsClock svgConfig ( people, angleOfRotation ) =
             }
     in
     svg
-        [ svgConfig.width |> toString |> Svg.Attributes.width
+        [ class svgConfig.class
+        , svgConfig.width |> toString |> Svg.Attributes.width
         , svgConfig.height |> toString |> Svg.Attributes.height
         ] <|
         List.concat
@@ -182,7 +183,8 @@ viewWheel svgConfig ( people, angleOfRotation ) =
             }
     in
     svg
-        [ svgConfig.width |> toString |> Svg.Attributes.width
+        [ class svgConfig.class
+        , svgConfig.width |> toString |> Svg.Attributes.width
         , svgConfig.height |> toString |> Svg.Attributes.height
         ] <|
         List.concat
@@ -295,7 +297,8 @@ type alias Person =
 
 
 type alias SvgConfig =
-    { width : Int
+    { class : String
+    , width : Int
     , height : Int
     }
 

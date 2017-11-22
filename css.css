@@ -9,7 +9,23 @@ main {
 
 svg {
   display: block;
-  margin: auto;
+}
+
+.wheel-view {
+    margin: auto;
+}
+
+.input-label {
+  margin-right: 10px;
+}
+
+.row {
+    display: block;
+    margin: 10px 0;
+}
+
+.left-column-input {
+    margin-right: 10px;
 }
 
 .wheelInput {
