@@ -9,7 +9,6 @@ import JobWheel
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Ports
-import RemoteData
 import Return
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -113,24 +112,11 @@ viewLoading svgConfig =
 viewOptionsForWheels : Model -> List (Html.Html Msg)
 viewOptionsForWheels model =
     let
-        optionCurrentlySelected =
-            wheelEntityToOptionEl model.selectedWheel
-
         wheelsToElements : JobWheelList -> List (Html Msg)
         wheelsToElements jobWheelList =
             List.map wheelEntityToOptionEl jobWheelList
-
-        remoteOptionsForOtherWheels : RemoteData.RemoteData String (List (Html Msg))
-        remoteOptionsForOtherWheels =
-            model.wheels
-                |> RemoteData.map wheelsToElements
     in
-    case remoteOptionsForOtherWheels of
-        RemoteData.Success optionElements ->
-            List.append [ optionCurrentlySelected ] optionElements
-
-        _ ->
-            [ optionCurrentlySelected ]
+    wheelsToElements model.wheels
 
 
 wheelEntityToOptionEl : Entity JobWheel.JobWheel -> Html Msg
@@ -239,7 +225,7 @@ viewError error =
 
 
 type alias Model =
-    { wheels : RemoteData.RemoteData String JobWheelList
+    { wheels : JobWheelList
     , selectedWheel : Entity JobWheel.JobWheel
     , wheelOrientation : TimeDependentState WheelOrientation
     , currentJobs : TimeDependentState (List JobWheel.ResponsiblePerson)
@@ -264,24 +250,18 @@ changeWheelOrientation orientation model =
 
 addDistinctWheels : JobWheelList -> Model -> Model
 addDistinctWheels wheels model =
-    case model.wheels of
-        RemoteData.Success existingWheels ->
-            let
-                existingIds =
-                    List.map justTheId existingWheels
+    let
+        existingIds =
+            List.map justTheId model.wheels
 
-                newAndDistinct =
-                    List.filter (\(Entity id jobWheel) -> not <| (List.member id existingIds)) wheels
+        newAndDistinct =
+            List.filter (\(Entity id jobWheel) -> not <| (List.member id existingIds)) wheels
 
-                updatedWheels =
-                    newAndDistinct 
-                        |> List.append existingWheels
-                        |> RemoteData.Success
-            in
-            { model | wheels = updatedWheels }
-
-        _ ->
-            { model | wheels = RemoteData.Success wheels }
+        updatedWheels =
+            newAndDistinct 
+                |> List.append model.wheels
+    in
+    { model | wheels = updatedWheels }
 
 
 setError : String -> Model -> Model
@@ -348,20 +328,14 @@ type alias JobWheelList =
     List (Entity JobWheel.JobWheel)
 
 
-findWheel : Int -> RemoteData.RemoteData String JobWheelList -> Result String (Entity JobWheel.JobWheel)
-findWheel id remoteWheelList =
-    case remoteWheelList of
-        RemoteData.Success jobWheelList ->
-            let
-                idsMatch : Entity (JobWheel.JobWheel) -> Bool
-                idsMatch (Entity someId _) =
-                    someId == id
-            in
-            jobWheelList |> firstInList idsMatch
-
-        _ ->
-            Err "don't have wheel list"
-    
+findWheel : Int -> JobWheelList -> Result String (Entity JobWheel.JobWheel)
+findWheel id wheelList =
+    let
+        idsMatch : Entity (JobWheel.JobWheel) -> Bool
+        idsMatch (Entity someId _) =
+            someId == id
+    in
+    wheelList |> firstInList idsMatch
 
 
 type Entity a =
@@ -412,9 +386,12 @@ init =
             WheelForm.init
                 |> Return.mapCmd WheelFormMsg
 
+        simpleWheelEntity =
+            Entity 0 JobWheel.simpleWheel
+
         startingModel =
-            { wheels = RemoteData.NotAsked
-            , selectedWheel = Entity 0 JobWheel.simpleWheel
+            { wheels = [ simpleWheelEntity ] 
+            , selectedWheel = simpleWheelEntity
             , wheelOrientation = Unknown
             , currentJobs = Unknown
             , timeOfNextChange = Unknown

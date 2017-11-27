@@ -12325,22 +12325,17 @@ var _user$project$Main$getNextId = function (entities) {
 	}
 };
 var _user$project$Main$findWheel = F2(
-	function (id, remoteWheelList) {
-		var _p8 = remoteWheelList;
-		if (_p8.ctor === 'Success') {
-			var idsMatch = function (_p9) {
-				var _p10 = _p9;
-				return _elm_lang$core$Native_Utils.eq(_p10._0, id);
-			};
-			return A2(_user$project$Main$firstInList, idsMatch, _p8._0);
-		} else {
-			return _elm_lang$core$Result$Err('don\'t have wheel list');
-		}
+	function (id, wheelList) {
+		var idsMatch = function (_p8) {
+			var _p9 = _p8;
+			return _elm_lang$core$Native_Utils.eq(_p9._0, id);
+		};
+		return A2(_user$project$Main$firstInList, idsMatch, wheelList);
 	});
 var _user$project$Main$countValueToString = function (countValue) {
-	var _p11 = countValue;
-	if (_p11.ctor === 'MoreThanOne') {
-		return _elm_lang$core$Basics$toString(_p11._0);
+	var _p10 = countValue;
+	if (_p10.ctor === 'MoreThanOne') {
+		return _elm_lang$core$Basics$toString(_p10._0);
 	} else {
 		return A2(_elm_lang$core$Debug$log, 'empty string is interesting', '');
 	}
@@ -12355,35 +12350,24 @@ var _user$project$Main$setError = F2(
 	});
 var _user$project$Main$addDistinctWheels = F2(
 	function (wheels, model) {
-		var _p12 = model.wheels;
-		if (_p12.ctor === 'Success') {
-			var _p15 = _p12._0;
-			var existingIds = A2(_elm_lang$core$List$map, _user$project$Main$justTheId, _p15);
-			var newAndDistinct = A2(
-				_elm_lang$core$List$filter,
-				function (_p13) {
-					var _p14 = _p13;
-					return !A2(_elm_lang$core$List$member, _p14._0, existingIds);
-				},
-				wheels);
-			var updatedWheels = _krisajenkins$remotedata$RemoteData$Success(
-				A2(_elm_lang$core$List$append, _p15, newAndDistinct));
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{wheels: updatedWheels});
-		} else {
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{
-					wheels: _krisajenkins$remotedata$RemoteData$Success(wheels)
-				});
-		}
+		var existingIds = A2(_elm_lang$core$List$map, _user$project$Main$justTheId, model.wheels);
+		var newAndDistinct = A2(
+			_elm_lang$core$List$filter,
+			function (_p11) {
+				var _p12 = _p11;
+				return !A2(_elm_lang$core$List$member, _p12._0, existingIds);
+			},
+			wheels);
+		var updatedWheels = A2(_elm_lang$core$List$append, model.wheels, newAndDistinct);
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{wheels: updatedWheels});
 	});
 var _user$project$Main$viewError = function (error) {
 	var textNode = function () {
-		var _p16 = error;
-		if (_p16.ctor === 'Just') {
-			return _elm_lang$html$Html$text(_p16._0);
+		var _p13 = error;
+		if (_p13.ctor === 'Just') {
+			return _elm_lang$html$Html$text(_p13._0);
 		} else {
 			return _elm_lang$html$Html$text('');
 		}
@@ -12424,22 +12408,22 @@ var _user$project$Main$viewJob = F3(
 	});
 var _user$project$Main$viewCurrentJobs = F2(
 	function (svgConfig, timeDependentState) {
-		var _p17 = timeDependentState;
-		if (_p17.ctor === 'Known') {
-			var _p23 = _p17._0;
-			var peopleCount = _elm_lang$core$List$length(_p23);
+		var _p14 = timeDependentState;
+		if (_p14.ctor === 'Known') {
+			var _p20 = _p14._0;
+			var peopleCount = _elm_lang$core$List$length(_p20);
 			var yPositions = A2(_user$project$Main$getPositions, peopleCount, svgConfig.height);
 			var responsibilityX = 150;
 			var personX = '50';
 			var concatTextElements = F2(
-				function (_p18, svgList) {
-					var _p19 = _p18;
-					var _p22 = _p19._0;
-					var _p21 = _p19._1;
+				function (_p15, svgList) {
+					var _p16 = _p15;
+					var _p19 = _p16._0;
+					var _p18 = _p16._1;
 					var maybeJobTextElement = A2(
 						_elm_lang$core$Maybe$map,
-						A2(_user$project$Main$viewJob, responsibilityX, _p22),
-						_p21.job);
+						A2(_user$project$Main$viewJob, responsibilityX, _p19),
+						_p18.job);
 					var personTextElement = A2(
 						_elm_lang$svg$Svg$text_,
 						{
@@ -12448,24 +12432,24 @@ var _user$project$Main$viewCurrentJobs = F2(
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Attributes$y(
-									_elm_lang$core$Basics$toString(_p22)),
+									_elm_lang$core$Basics$toString(_p19)),
 								_1: {ctor: '[]'}
 							}
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$svg$Svg$text(_p21.name),
+							_0: _elm_lang$svg$Svg$text(_p18.name),
 							_1: {ctor: '[]'}
 						});
 					var toAppend = function () {
-						var _p20 = maybeJobTextElement;
-						if (_p20.ctor === 'Just') {
+						var _p17 = maybeJobTextElement;
+						if (_p17.ctor === 'Just') {
 							return {
 								ctor: '::',
 								_0: personTextElement,
 								_1: {
 									ctor: '::',
-									_0: _p20._0,
+									_0: _p17._0,
 									_1: {ctor: '[]'}
 								}
 							};
@@ -12490,7 +12474,7 @@ var _user$project$Main$viewCurrentJobs = F2(
 							return {ctor: '_Tuple2', _0: v0, _1: v1};
 						}),
 					yPositions,
-					_p23));
+					_p20));
 			return A2(
 				_elm_lang$svg$Svg$svg,
 				{
@@ -12541,20 +12525,20 @@ var _user$project$Main$viewCurrentJobs = F2(
 				});
 		}
 	});
-var _user$project$Main$wheelEntityToOptionEl = function (_p24) {
-	var _p25 = _p24;
+var _user$project$Main$wheelEntityToOptionEl = function (_p21) {
+	var _p22 = _p21;
 	return A2(
 		_elm_lang$html$Html$option,
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$value(
-				_elm_lang$core$Basics$toString(_p25._0)),
+				_elm_lang$core$Basics$toString(_p22._0)),
 			_1: {ctor: '[]'}
 		},
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html$text(
-				_user$project$JobWheel$describeWheel(_p25._1)),
+				_user$project$JobWheel$describeWheel(_p22._1)),
 			_1: {ctor: '[]'}
 		});
 };
@@ -12562,25 +12546,7 @@ var _user$project$Main$viewOptionsForWheels = function (model) {
 	var wheelsToElements = function (jobWheelList) {
 		return A2(_elm_lang$core$List$map, _user$project$Main$wheelEntityToOptionEl, jobWheelList);
 	};
-	var remoteOptionsForOtherWheels = A2(_krisajenkins$remotedata$RemoteData$map, wheelsToElements, model.wheels);
-	var optionCurrentlySelected = _user$project$Main$wheelEntityToOptionEl(model.selectedWheel);
-	var _p26 = remoteOptionsForOtherWheels;
-	if (_p26.ctor === 'Success') {
-		return A2(
-			_elm_lang$core$List$append,
-			{
-				ctor: '::',
-				_0: optionCurrentlySelected,
-				_1: {ctor: '[]'}
-			},
-			_p26._0);
-	} else {
-		return {
-			ctor: '::',
-			_0: optionCurrentlySelected,
-			_1: {ctor: '[]'}
-		};
-	}
+	return wheelsToElements(model.wheels);
 };
 var _user$project$Main$viewLoading = function (svgConfig) {
 	return A2(
@@ -12720,12 +12686,17 @@ var _user$project$Main$WheelFormMsg = function (a) {
 	return {ctor: 'WheelFormMsg', _0: a};
 };
 var _user$project$Main$init = function () {
-	var _p27 = A2(_Fresheyeball$elm_return$Return$mapCmd, _user$project$Main$WheelFormMsg, _user$project$WheelForm$init);
-	var startingWheelForm = _p27._0;
-	var wheelFormCmd = _p27._1;
+	var simpleWheelEntity = A2(_user$project$Main$Entity, 0, _user$project$JobWheel$simpleWheel);
+	var _p23 = A2(_Fresheyeball$elm_return$Return$mapCmd, _user$project$Main$WheelFormMsg, _user$project$WheelForm$init);
+	var startingWheelForm = _p23._0;
+	var wheelFormCmd = _p23._1;
 	var startingModel = {
-		wheels: _krisajenkins$remotedata$RemoteData$NotAsked,
-		selectedWheel: A2(_user$project$Main$Entity, 0, _user$project$JobWheel$simpleWheel),
+		wheels: {
+			ctor: '::',
+			_0: simpleWheelEntity,
+			_1: {ctor: '[]'}
+		},
+		selectedWheel: simpleWheelEntity,
 		wheelOrientation: _user$project$Main$Unknown,
 		currentJobs: _user$project$Main$Unknown,
 		timeOfNextChange: _user$project$Main$Unknown,
@@ -12738,12 +12709,12 @@ var _user$project$Main$init = function () {
 }();
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p28 = msg;
-		switch (_p28.ctor) {
+		var _p24 = msg;
+		switch (_p24.ctor) {
 			case 'ToggleDisplayMode':
 				var newDisplayMode = function () {
-					var _p29 = model.displayMode;
-					if (_p29.ctor === 'RealTime') {
+					var _p25 = model.displayMode;
+					if (_p25.ctor === 'RealTime') {
 						return _user$project$Main$Static;
 					} else {
 						return _user$project$Main$RealTime;
@@ -12757,13 +12728,13 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'TimeReceived':
-				var _p34 = _p28._0;
+				var _p30 = _p24._0;
 				var timeForAChange = function () {
-					var _p30 = model.displayMode;
-					if (_p30.ctor === 'Static') {
-						var _p31 = model.timeOfNextChange;
-						if (_p31.ctor === 'Known') {
-							return (_elm_lang$core$Native_Utils.cmp(_p34, _p31._0) > -1) ? true : false;
+					var _p26 = model.displayMode;
+					if (_p26.ctor === 'Static') {
+						var _p27 = model.timeOfNextChange;
+						if (_p27.ctor === 'Known') {
+							return (_elm_lang$core$Native_Utils.cmp(_p30, _p27._0) > -1) ? true : false;
 						} else {
 							return true;
 						}
@@ -12772,22 +12743,22 @@ var _user$project$Main$update = F2(
 					}
 				}();
 				if (timeForAChange) {
-					var _p32 = function () {
-						var _p33 = model.displayMode;
-						if (_p33.ctor === 'Static') {
+					var _p28 = function () {
+						var _p29 = model.displayMode;
+						if (_p29.ctor === 'Static') {
 							return A2(
 								_user$project$JobWheel$getStaticOrientation,
-								_p34,
+								_p30,
 								_user$project$Main$justTheValue(model.selectedWheel));
 						} else {
 							return A2(
 								_user$project$JobWheel$getRealTimeOrientation,
-								_p34,
+								_p30,
 								_user$project$Main$justTheValue(model.selectedWheel));
 						}
 					}();
-					var personList = _p32._0;
-					var angle = _p32._1;
+					var personList = _p28._0;
+					var angle = _p28._1;
 					var reducedTurns = _user$project$FloatOps$justTheDecimalPart(
 						_user$project$Angle$inRadians(angle) / (2 * _elm_lang$core$Basics$pi));
 					var reducedDegrees = reducedTurns * 360;
@@ -12801,7 +12772,7 @@ var _user$project$Main$update = F2(
 						_user$project$Main$changeWheelOrientation(wheelOrientation),
 						A2(
 							_Fresheyeball$elm_return$Return$map,
-							_user$project$Main$determineTimeDependentState(_p34),
+							_user$project$Main$determineTimeDependentState(_p30),
 							{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none}));
 				} else {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -12812,12 +12783,12 @@ var _user$project$Main$update = F2(
 					function (id) {
 						return A2(_user$project$Main$findWheel, id, model.wheels);
 					},
-					_elm_lang$core$String$toInt(_p28._0));
-				var _p35 = findWheelResult;
-				if (_p35.ctor === 'Ok') {
+					_elm_lang$core$String$toInt(_p24._0));
+				var _p31 = findWheelResult;
+				if (_p31.ctor === 'Ok') {
 					return A2(
 						_Fresheyeball$elm_return$Return$map,
-						_user$project$Main$changeSelectedWheel(_p35._0),
+						_user$project$Main$changeSelectedWheel(_p31._0),
 						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 				} else {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -12833,27 +12804,27 @@ var _user$project$Main$update = F2(
 								model,
 								{wheelForm: updatedWheelForm});
 						},
-						A2(_user$project$WheelForm$update, _p28._0, model.wheelForm)));
+						A2(_user$project$WheelForm$update, _p24._0, model.wheelForm)));
 			case 'MakeCreateCmd':
 				var makeJobWheel = function (time) {
-					var _p36 = A2(
+					var _p32 = A2(
 						_user$project$JobWheel$makeJobWheel,
 						time,
 						_user$project$WheelForm$getFormData(model.wheelForm));
-					if (_p36.ctor === 'Ok') {
-						return _elm_lang$core$Task$succeed(_p36._0);
+					if (_p32.ctor === 'Ok') {
+						return _elm_lang$core$Task$succeed(_p32._0);
 					} else {
-						return _elm_lang$core$Task$fail(_p36._0);
+						return _elm_lang$core$Task$fail(_p32._0);
 					}
 				};
 				var creationTask = A2(_elm_lang$core$Task$andThen, makeJobWheel, _elm_lang$core$Time$now);
 				var wheelResultToMsg = function (wheelResult) {
-					var _p37 = wheelResult;
-					if (_p37.ctor === 'Ok') {
-						return _user$project$Main$MakeSaveCmd(_p37._0);
+					var _p33 = wheelResult;
+					if (_p33.ctor === 'Ok') {
+						return _user$project$Main$MakeSaveCmd(_p33._0);
 					} else {
 						return _user$project$Main$ErrorCreatingJobWheel(
-							A2(_elm_lang$core$Debug$log, 'create wheel error: ', _p37._0));
+							A2(_elm_lang$core$Debug$log, 'create wheel error: ', _p33._0));
 					}
 				};
 				return A2(
@@ -12868,7 +12839,7 @@ var _user$project$Main$update = F2(
 						},
 						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none}));
 			case 'MakeSaveCmd':
-				var encodedJobWheel = _user$project$JobWheel$encode(_p28._0);
+				var encodedJobWheel = _user$project$JobWheel$encode(_p24._0);
 				return A2(
 					_Fresheyeball$elm_return$Return$command,
 					_user$project$Ports$saveWheelCmd(encodedJobWheel),
@@ -12876,12 +12847,12 @@ var _user$project$Main$update = F2(
 			case 'WheelsReceived':
 				return A2(
 					_Fresheyeball$elm_return$Return$map,
-					_user$project$Main$addDistinctWheels(_p28._0),
+					_user$project$Main$addDistinctWheels(_p24._0),
 					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 			case 'ErrorCreatingJobWheel':
 				return A2(
 					_Fresheyeball$elm_return$Return$map,
-					_user$project$Main$setError(_p28._0),
+					_user$project$Main$setError(_p24._0),
 					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
 			case 'WheelViewMsg':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -12894,18 +12865,18 @@ var _user$project$Main$SelectedWheelChanged = function (a) {
 };
 var _user$project$Main$viewWheel = function (model) {
 	var jobsSvg = function () {
-		var _p38 = model.displayMode;
-		if (_p38.ctor === 'RealTime') {
-			var _p39 = model.wheelOrientation;
-			if (_p39.ctor === 'Known') {
-				var _p40 = _p39._0;
+		var _p34 = model.displayMode;
+		if (_p34.ctor === 'RealTime') {
+			var _p35 = model.wheelOrientation;
+			if (_p35.ctor === 'Known') {
+				var _p36 = _p35._0;
 				var wheelView = A2(
 					_user$project$WheelView$viewAsClock,
 					_user$project$Main$svgConfig,
 					{
 						ctor: '_Tuple2',
-						_0: _p40.personList,
-						_1: _user$project$Angle$fromDegrees(_p40.angleInDegrees)
+						_0: _p36.personList,
+						_1: _user$project$Angle$fromDegrees(_p36.angleInDegrees)
 					});
 				return A2(
 					_elm_lang$html$Html$map,
@@ -12915,16 +12886,16 @@ var _user$project$Main$viewWheel = function (model) {
 				return _user$project$Main$viewLoading(_user$project$Main$svgConfig);
 			}
 		} else {
-			var _p41 = model.wheelOrientation;
-			if (_p41.ctor === 'Known') {
-				var _p42 = _p41._0;
+			var _p37 = model.wheelOrientation;
+			if (_p37.ctor === 'Known') {
+				var _p38 = _p37._0;
 				var wheelView = A2(
 					_user$project$WheelView$viewWheel,
 					_user$project$Main$svgConfig,
 					{
 						ctor: '_Tuple2',
-						_0: _p42.personList,
-						_1: _user$project$Angle$fromDegrees(_p42.angleInDegrees)
+						_0: _p38.personList,
+						_1: _user$project$Angle$fromDegrees(_p38.angleInDegrees)
 					});
 				return A2(
 					_elm_lang$html$Html$map,
@@ -12935,9 +12906,9 @@ var _user$project$Main$viewWheel = function (model) {
 			}
 		}
 	}();
-	var _p43 = _elm_lang$core$Basics$identity(model.selectedWheel);
-	var selectedId = _p43._0;
-	var selectedWheel = _p43._1;
+	var _p39 = _elm_lang$core$Basics$identity(model.selectedWheel);
+	var selectedId = _p39._0;
+	var selectedWheel = _p39._1;
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
@@ -13049,14 +13020,14 @@ var _user$project$Main$TimeReceived = function (a) {
 };
 var _user$project$Main$Nevermind = {ctor: 'Nevermind'};
 var _user$project$Main$wheelsJsonToMsg = function (json) {
-	var _p44 = A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Main$wheelsDecoder, json);
-	if (_p44.ctor === 'Ok') {
-		return _user$project$Main$WheelsReceived(_p44._0);
+	var _p40 = A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Main$wheelsDecoder, json);
+	if (_p40.ctor === 'Ok') {
+		return _user$project$Main$WheelsReceived(_p40._0);
 	} else {
 		return A2(
 			_elm_lang$core$Basics$always,
 			_user$project$Main$Nevermind,
-			A2(_elm_lang$core$Debug$log, 'decoding error: ', _p44._0));
+			A2(_elm_lang$core$Debug$log, 'decoding error: ', _p40._0));
 	}
 };
 var _user$project$Main$subscriptions = function (model) {
