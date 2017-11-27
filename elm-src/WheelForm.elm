@@ -29,6 +29,7 @@ view (WheelForm wheelForm) =
             , input
                 [ id "wheel-description"
                 , onInput SetDescription
+                , value wheelForm.description
                 ] [ ]
             ]
         , div [ class "row" ]
@@ -48,7 +49,10 @@ view (WheelForm wheelForm) =
         , viewParticipantInputs wheelForm.participants
         , p [ ] [ Html.text "preview:" ]
         , viewPreview
-            { class = "wheel-preview", height = 600, width = 600 }
+            { class = "wheel-preview"
+            , fontSize = "18"
+            , height = 600
+            , width = 600 }
             wheelForm.participants
         , div
             [ class "row" ]

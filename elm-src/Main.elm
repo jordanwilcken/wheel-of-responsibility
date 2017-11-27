@@ -24,17 +24,21 @@ view model =
     div []
         [ viewWheel model
         , hr [] []
-        , viewError model.error
         , (WheelForm.view model.wheelForm) |> Html.map WheelFormMsg
         , button
             [ onClick MakeCreateCmd ]
             [ Html.text "Looks good. Make it so." ]
+        , viewError model.error
         ]
 
 
 svgConfig : SvgConfig
 svgConfig =
-    { class = "wheel-view", width = 800, height = 800 }
+    { class = "wheel-view"
+    , fontSize = "18"
+    , width = 800
+    , height = 800
+    }
 
 
 viewWheel : Model -> Html.Html Msg
@@ -65,7 +69,7 @@ viewWheel model =
                             let
                                 wheelView =
                                     WheelView.viewWheel
-                                        { class = "wheel-view", width = 800, height = 800 }
+                                        svgConfig
                                         ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
                             in
                             wheelView |> Html.map (always WheelViewMsg)
@@ -202,6 +206,7 @@ viewCurrentJobs svgConfig timeDependentState =
 
 type alias SvgConfig =
     { class : String
+    , fontSize : String
     , width : Int
     , height : Int
     }
@@ -227,7 +232,7 @@ viewError error =
                 Nothing ->
                     Html.text ""
     in
-    p [ Html.Attributes.class "error-message" ] [ textNode ]
+    span [ Html.Attributes.class "error-message" ] [ textNode ]
 
 
 -- Model
@@ -530,7 +535,7 @@ update msg model =
 
                         Err error ->
                             Debug.log "create wheel error: " error
-                                |> always Nevermind
+                                |> ErrorCreatingJobWheel
                 
                 makeJobWheel time =
                     case JobWheel.makeJobWheel time (WheelForm.getFormData model.wheelForm) of
@@ -545,6 +550,7 @@ update msg model =
                         |> Task.andThen makeJobWheel 
             in
             ( model, Cmd.none )
+                |> Return.map (\theModel -> { theModel | error = Nothing })
                 |> Return.command (Task.attempt wheelResultToMsg creationTask)
 
         MakeSaveCmd jobWheel ->

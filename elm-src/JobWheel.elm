@@ -48,7 +48,7 @@ simpleWheel =
     JobWheel
         { description = "Example Job Wheel"
         , timeCreated = 0
-        , period = 4 * Time.second
+        , period = 25 * Time.second
         , origin = simplePeople
         , rotationDirection = Clockwise
         }
@@ -81,9 +81,13 @@ type alias FormData =
 
 simplePeople : ResponsiblePeople
 simplePeople =
-    { first = ResponsiblePerson 1 "Jim" (Just (Job 1 "float like a butterfly"))
-    , middle = []
-    , last = ResponsiblePerson 2 "Bob" (Just (Job 2 "sting like a bee"))
+    { first = ResponsiblePerson 1 "This" (Just (Job 1 "the participants"))
+    , middle =
+        [ ResponsiblePerson 2 "is" (Just (Job 1 "change jobs"))
+        , ResponsiblePerson 3 "a" (Just (Job 1 "every"))
+        , ResponsiblePerson 4 "job" (Just (Job 1 "5"))
+        ]
+    , last = ResponsiblePerson 5 "wheel" (Just (Job 2 "seconds"))
     }
 
 
@@ -477,7 +481,7 @@ toResponsiblePerson record =
 
 allWhitespace : String -> Bool
 allWhitespace someString =
-    Regex.contains (Regex.regex "^\\s+$") someString
+    Regex.contains (Regex.regex "^\\s*$") someString
 
 
 calculatePeriod : Time.Time -> ResponsiblePeople -> Time.Time

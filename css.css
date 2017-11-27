@@ -11,6 +11,11 @@ svg {
   display: block;
 }
 
+.error-message {
+    color: red;
+    margin-left: 10px;
+}
+
 .wheel-view {
     margin: auto;
 }

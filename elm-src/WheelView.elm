@@ -44,6 +44,7 @@ viewAsClock svgConfig ( people, angleOfRotation ) =
     in
     svg
         [ class svgConfig.class
+        , fontSize svgConfig.fontSize
         , svgConfig.width |> toString |> Svg.Attributes.width
         , svgConfig.height |> toString |> Svg.Attributes.height
         ] <|
@@ -184,6 +185,7 @@ viewWheel svgConfig ( people, angleOfRotation ) =
     in
     svg
         [ class svgConfig.class
+        , fontSize svgConfig.fontSize
         , svgConfig.width |> toString |> Svg.Attributes.width
         , svgConfig.height |> toString |> Svg.Attributes.height
         ] <|
@@ -298,6 +300,7 @@ type alias Person =
 
 type alias SvgConfig =
     { class : String
+    , fontSize : String
     , width : Int
     , height : Int
     }
