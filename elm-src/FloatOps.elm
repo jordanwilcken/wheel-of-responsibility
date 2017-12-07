@@ -1,7 +1,6 @@
 module FloatOps exposing (justTheDecimalPart)
 
 
-
 justTheDecimalPart : Float -> Float
 justTheDecimalPart someFloat =
     let

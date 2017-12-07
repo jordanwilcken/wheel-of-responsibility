@@ -2,12 +2,12 @@ module JobWheel
     exposing
         ( Job
         , JobWheel
-        , getRealTimeOrientation
-        , getStaticOrientation
         , ResponsiblePerson
         , describeWheel
         , determineJobsAt
         , encode
+        , getRealTimeOrientation
+        , getStaticOrientation
         , jobWheelDecoder
         , makeJobWheel
         , simpleWheel
@@ -61,7 +61,7 @@ makeJobWheel theTime formData =
             JobWheel
                 { description = validDescription
                 , timeCreated = theTime
-                , period = (calculatePeriod formData.rotationInterval responsiblePeople)
+                , period = calculatePeriod formData.rotationInterval responsiblePeople
                 , origin = responsiblePeople
                 , rotationDirection = Clockwise
                 }
@@ -259,7 +259,6 @@ directionDecoder =
         stringToDirection someString =
             if someString == "counterClockwise" then
                 CounterClockwise
-
             else
                 Clockwise
     in
@@ -269,7 +268,7 @@ directionDecoder =
 
 type JobWheel
     = JobWheel
-        { description: String
+        { description : String
         , timeCreated : Time.Time
         , period : Time.Time
         , origin : ResponsiblePeople
@@ -367,8 +366,8 @@ responsiblePersonDecoder : Decode.Decoder ResponsiblePerson
 responsiblePersonDecoder =
     Decode.map2
         (ResponsiblePerson 42)
-            (Decode.field "name" Decode.string)
-            (Decode.field "job" jobDecoder)
+        (Decode.field "name" Decode.string)
+        (Decode.field "job" jobDecoder)
 
 
 jobDecoder : Decode.Decoder (Maybe Job)
@@ -378,7 +377,6 @@ jobDecoder =
         stringToJob someString =
             if String.length someString > 0 then
                 Just <| Job 42 someString
-            
             else
                 Nothing
     in
@@ -398,7 +396,7 @@ toResponsiblePeople personList =
                     Err "Your job wheel needs more participants"
 
         toTake =
-            (List.length personList) - 2
+            List.length personList - 2
 
         middle =
             personList
@@ -413,13 +411,12 @@ toResponsiblePeople personList =
 
                 Nothing ->
                     Err "Your job wheel needs more participants"
-            
     in
     Result.map3
         ResponsiblePeople
-            first
-            middle
-            last
+        first
+        middle
+        last
 
 
 getResponsiblePeople : List { name : String, job : String } -> Result String ResponsiblePeople
@@ -433,25 +430,21 @@ getResponsiblePeople participants =
         --    in
         --    if (List.length persons) == (List.length results) then
         --        Ok persons
-
         --    else
         --        Err
-
         toResponsibleList : List (Result String ResponsiblePerson) -> Result String (List ResponsiblePerson)
         toResponsibleList results =
             case List.head results of
                 Nothing ->
-                    Ok [ ]
+                    Ok []
 
                 Just resultItem ->
                     case resultItem of
                         Ok responsiblePerson ->
-                           (toResponsibleList (List.drop 1 results)) |> Result.map ((::) responsiblePerson)  
+                            toResponsibleList (List.drop 1 results) |> Result.map ((::) responsiblePerson)
 
                         Err error ->
                             Err error
-                        
-                    
     in
     participants
         |> List.map toResponsiblePerson
@@ -465,19 +458,17 @@ toResponsiblePerson record =
         name =
             if allWhitespace record.name then
                 Err "You can't have names consisting only of white space."
-
             else
                 Ok record.name
 
         job =
             if allWhitespace record.job then
                 Nothing
-
             else
                 Just (Job 42 record.job)
     in
     name |> Result.map (\theName -> ResponsiblePerson 42 theName job)
-    
+
 
 allWhitespace : String -> Bool
 allWhitespace someString =
@@ -486,7 +477,7 @@ allWhitespace someString =
 
 calculatePeriod : Time.Time -> ResponsiblePeople -> Time.Time
 calculatePeriod rotationInterval responsiblePeople =
-    rotationInterval * ((countPeople responsiblePeople) |> toFloat)   
+    rotationInterval * (countPeople responsiblePeople |> toFloat)
 
 
 countPeople : ResponsiblePeople -> Int
@@ -520,8 +511,6 @@ type alias Job =
 
 
 -- details
-
-
 
 
 shiftList : Int -> List a -> List a
@@ -594,6 +583,7 @@ firstToLast someList =
             someList
 
 
+
 -- details
 
 
@@ -601,6 +591,5 @@ getValidDescription : String -> Result String String
 getValidDescription proposedDescription =
     if allWhitespace proposedDescription then
         Err "You can't have a description that is all white space."
-
     else
         Ok proposedDescription

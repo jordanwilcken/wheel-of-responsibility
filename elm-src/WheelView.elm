@@ -1,10 +1,11 @@
 module WheelView exposing (SvgConfig, viewAsClock, viewWheel)
 
+import Angle
 import Html exposing (Html)
 import Svg exposing (..)
-import SvgSpace
-import Angle
 import Svg.Attributes exposing (..)
+import SvgSpace
+
 
 viewAsClock : SvgConfig -> ( List Person, Angle.AngleOfRotation ) -> Html.Html Never
 viewAsClock svgConfig ( people, angleOfRotation ) =
@@ -47,30 +48,33 @@ viewAsClock svgConfig ( people, angleOfRotation ) =
         , fontSize svgConfig.fontSize
         , svgConfig.width |> toString |> Svg.Attributes.width
         , svgConfig.height |> toString |> Svg.Attributes.height
-        ] <|
+        ]
+    <|
         List.concat
             [ [ circle
-                  [ cx <| (center.x |> toString)
-                  , cy <| (center.y |> toString)
-                  , fill "tan"
-                  , r (outerCircle.r |> toString)
-                  ] [ ]
+                    [ cx <| (center.x |> toString)
+                    , cy <| (center.y |> toString)
+                    , fill "tan"
+                    , r (outerCircle.r |> toString)
+                    ]
+                    []
               ]
-            , (divideCircle names outerCircle)
+            , divideCircle names outerCircle
             , [ circle
-                 [ cx <| (center.x |> toString)
-                 , cy <| (center.y |> toString)
-                 , fill "lightblue"
-                 , r (innerCircle.r |> toString)
-                 , stroke "black"
-                 , strokeWidth "4"
-                 ] [ ]
+                    [ cx <| (center.x |> toString)
+                    , cy <| (center.y |> toString)
+                    , fill "lightblue"
+                    , r (innerCircle.r |> toString)
+                    , stroke "black"
+                    , strokeWidth "4"
+                    ]
+                    []
               ]
-            , (drawHands jobs innerCircle)
+            , drawHands jobs innerCircle
             ]
 
 
-drawHands : List String -> { angleOfRotation : Angle.AngleOfRotation , cx : Int, cy: Int, r: Int } -> List (Svg Never)
+drawHands : List String -> { angleOfRotation : Angle.AngleOfRotation, cx : Int, cy : Int, r : Int } -> List (Svg Never)
 drawHands strings circle =
     let
         lineAngle =
@@ -117,7 +121,7 @@ drawHands strings circle =
                     20
 
                 pointsString =
-                    SvgSpace.getEquilateralPointsBasedOnTop sideLength { x = circle.cx, y = (circle.cy - circle.r) }
+                    SvgSpace.getEquilateralPointsBasedOnTop sideLength { x = circle.cx, y = circle.cy - circle.r }
                         |> List.map stringifyPoint
                         |> joinStringsWith " "
             in
@@ -132,7 +136,8 @@ drawHands strings circle =
                 [ points pointsString
                 , fill "black"
                 , transform textTransformValue
-                ] [ ]
+                ]
+                []
             , line
                 [ x1 (circle.cx |> toString)
                 , y1 (circle.cy |> toString)
@@ -141,7 +146,8 @@ drawHands strings circle =
                 , stroke "black"
                 , strokeWidth "4"
                 , transform transformValue
-                ] [ ]
+                ]
+                []
             ]
     in
     List.indexedMap toElements strings
@@ -188,30 +194,33 @@ viewWheel svgConfig ( people, angleOfRotation ) =
         , fontSize svgConfig.fontSize
         , svgConfig.width |> toString |> Svg.Attributes.width
         , svgConfig.height |> toString |> Svg.Attributes.height
-        ] <|
+        ]
+    <|
         List.concat
             [ [ circle
-                  [ cx <| (center.x |> toString)
-                  , cy <| (center.y |> toString)
-                  , fill "tan"
-                  , r (outerCircle.r |> toString)
-                  ] [ ]
+                    [ cx <| (center.x |> toString)
+                    , cy <| (center.y |> toString)
+                    , fill "tan"
+                    , r (outerCircle.r |> toString)
+                    ]
+                    []
               ]
-            , (divideCircle names outerCircle)
+            , divideCircle names outerCircle
             , [ circle
-                 [ cx <| (center.x |> toString)
-                 , cy <| (center.y |> toString)
-                 , fill "lightblue"
-                 , r (innerCircle.r |> toString)
-                 , stroke "black"
-                 , strokeWidth "4"
-                 ] [ ]
+                    [ cx <| (center.x |> toString)
+                    , cy <| (center.y |> toString)
+                    , fill "lightblue"
+                    , r (innerCircle.r |> toString)
+                    , stroke "black"
+                    , strokeWidth "4"
+                    ]
+                    []
               ]
-            , (divideCircle jobs innerCircle)
+            , divideCircle jobs innerCircle
             ]
 
 
-divideCircle : List String -> { angleOfRotation : Angle.AngleOfRotation , cx : Int, cy: Int, r: Int } -> List (Svg.Svg Never)
+divideCircle : List String -> { angleOfRotation : Angle.AngleOfRotation, cx : Int, cy : Int, r : Int } -> List (Svg.Svg Never)
 divideCircle strings circle =
     let
         lineAngle =
@@ -241,7 +250,8 @@ divideCircle strings circle =
         toElements index someString =
             let
                 angle =
-                    360 / (List.length strings |> toFloat)
+                    360
+                        / (List.length strings |> toFloat)
                         |> (*) (index |> toFloat)
                         |> (+) (circle.angleOfRotation |> Angle.inDegrees |> negate)
 
@@ -263,7 +273,8 @@ divideCircle strings circle =
                 , stroke "black"
                 , strokeWidth "4"
                 , transform transformValue
-                ] [ ]
+                ]
+                []
             ]
     in
     strings
@@ -289,7 +300,6 @@ toSection svgConfig person =
         ]
         [ text jobText
         ]
-    
 
 
 type alias Person =
@@ -305,13 +315,14 @@ type alias SvgConfig =
     , height : Int
     }
 
+
 type alias Angle =
     Angle.Angle
 
 
 stringifyPoint : { x : Int, y : Int } -> String
 stringifyPoint somePoint =
-    (toString somePoint.x) ++ "," ++ (toString somePoint.y)
+    toString somePoint.x ++ "," ++ toString somePoint.y
 
 
 joinStringsWith : String -> List String -> String

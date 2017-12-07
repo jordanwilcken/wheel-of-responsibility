@@ -1,8 +1,9 @@
 module SvgSpace exposing (getEquilateralPointsBasedOnTop)
 
 --in SVG space positive y is in the downward direction
-
 -- for simplicity, implemented only for triangles where the base of the triangle is parallel with the x-axis
+
+
 getEquilateralPointsBasedOnTop : Int -> Point -> List Point
 getEquilateralPointsBasedOnTop sideLength topPoint =
     let
@@ -19,7 +20,7 @@ getEquilateralPointsBasedOnTop sideLength topPoint =
             }
 
         point3 : Point
-        point3 = 
+        point3 =
             { x = topPoint.x + ((sideLengthFloat / 2) |> floor)
             , y = sharedY
             }

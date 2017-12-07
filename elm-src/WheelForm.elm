@@ -1,13 +1,13 @@
-module WheelForm exposing (Msg, WheelForm, FormData, encodeFormData, getFormData, init, countParticipants, update, view)
+module WheelForm exposing (FormData, Msg, WheelForm, encodeFormData, getFormData, init, update, view)
 
 import Angle
 import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (on, onInput, targetValue)
+import Json.Decode as Decode
 import Json.Encode as Encode
 import Return
-import StaticJobView
 import Time
 import WheelView
 
@@ -15,10 +15,7 @@ import WheelView
 view : WheelForm -> Html Msg
 view (WheelForm wheelForm) =
     div []
-        [ h1 [ ] [ Html.text "Make a new Job Wheel" ]
-        , button
-            [ class "row" ]
-            [ Html.text "use the wheel above as a template" ]
+        [ h1 [] [ Html.text "Make a new Job Wheel" ]
         , div
             [ class "row" ]
             [ label
@@ -30,7 +27,8 @@ view (WheelForm wheelForm) =
                 [ id "wheel-description"
                 , onInput SetDescription
                 , value wheelForm.description
-                ] [ ]
+                ]
+                []
             ]
         , div [ class "row" ]
             [ label
@@ -44,51 +42,66 @@ view (WheelForm wheelForm) =
                 , attribute "max" (maxParticipants |> toString)
                 , type_ "number"
                 , onInput participantCountStringToMsg
-                ] []   
+                ]
+                []
             ]
         , viewParticipantInputs wheelForm.participants
-        , p [ ] [ Html.text "preview:" ]
+        , p [] [ Html.text "preview:" ]
         , viewPreview
             { class = "wheel-preview"
             , fontSize = "18"
             , height = 600
-            , width = 600 }
+            , width = 600
+            }
             wheelForm.participants
-        , div
-            [ class "row" ]
-            [ span
-                [ class "input-label" ]
-                [ text "How often should participants rotate jobs?" ]
-            , span [ ]
-                [ label
-                    [ class "input-label"
-                    , for "rotation-interval"
-                    ]
-                    [ text "every" ]
-                , input
-                    [ id "rotation-interval"
-                    , attribute "max" "100"
-                    , attribute "min" (minInterval |> toString)
-                    , type_ "number"
-                    , onInput intervalStringToMsg
-                    ] [ ]
-                , select
-                    [ onInput unitStringToMsg
-                    ]
-                    [ option
-                        [ value "seconds" ] [ text "seconds" ]
-                    , option
-                        [ value "minutes" ] [ text "minutes" ]
-                    , option
-                        [ value "hours" ] [ text "hours" ]
-                    , option
-                        [ value "days" ] [ text "days" ]
-                    , option 
-                        [ value "weeks" ] [ text "weeks" ]
-                    ]
-                ]
-            ]
+        , viewTimeUnitSelect
         ]
+
+
+viewTimeUnitSelect : Html Msg
+viewTimeUnitSelect =
+    div
+      [ class "row" ]
+      [ span
+          [ class "input-label" ]
+          [ text "How often should participants rotate jobs?" ]
+      , span []
+          [ label
+              [ class "input-label"
+              , for "rotation-interval"
+              ]
+              [ text "every" ]
+          , input
+              [ id "rotation-interval"
+              , attribute "max" "100"
+              , attribute "min" (minInterval |> toString)
+              , type_ "number"
+              , onInput intervalStringToMsg
+              ]
+              []
+          , select
+              [ on
+                  "change"
+                  (Decode.map unitStringToMsg targetValue)
+              ]
+              [ option
+                  [ value "seconds" ]
+                  [ text "seconds" ]
+              , option
+                  [ value "minutes" ]
+                  [ text "minutes" ]
+              , option
+                  [ value "hours" ]
+                  [ text "hours" ]
+              , option
+                  [ value "days" ]
+                  [ text "days" ]
+              , option
+                  [ value "weeks" ]
+                  [ text "weeks" ]
+              ]
+          ]
+      ]
 
 
 viewPreview : WheelView.SvgConfig -> List Participant -> Html Msg
@@ -97,62 +110,61 @@ viewPreview svgConfig participants =
         thePreview =
             WheelView.viewWheel
                 svgConfig
-                ( participants |> List.map toStaticJobViewPerson
+                ( participants |> List.map toPerson
                 , Angle.fromDegrees 0
                 )
     in
     thePreview |> Html.map PreviewMsg
 
 
-viewParticipantInputs : (List Participant) -> Html Msg
+viewParticipantInputs : List Participant -> Html Msg
 viewParticipantInputs participants =
+    div [] (participants |> List.indexedMap viewNameAndJobInputs)
+
+
+viewNameAndJobInputs : Int -> Participant -> Html Msg
+viewNameAndJobInputs index participant =
     let
-        viewSingle : Int -> Participant -> Html Msg
-        viewSingle index participant =
-            let
-                nameId =
-                    "participant-name-" ++ (index + 1 |> toString)
+        nameId =
+            "participant-name-" ++ (index + 1 |> toString)
 
-                jobId =
-                    "job-description-" ++ (index + 1 |> toString)
-            in
-            div [ class "row" ]
-                [ label
-                    [ class "input-label"
-                    , for nameId
-                    ]
-                    [ text "name" ]
-                , input
-                    [ id nameId
-                    , class "wheel-input left-column-input"
-                    , onInput (NameChanged index)
-                    , value participant.name
-                    ]
-                    [ ]
-                , label
-                    [ class "input-label"
-                    , for jobId
-                    ]
-                    [ text "job" ]
-                , input
-                    [ for jobId
-                    , class "wheel-input"
-                    , onInput (JobChanged index)
-                    , value participant.job
-                    ]
-                    [ ]
-                ]
+        jobId =
+            "job-description-" ++ (index + 1 |> toString)
     in
-    div []
-        (participants |> List.indexedMap viewSingle)
+    div [ class "row" ]
+        [ label
+            [ class "input-label"
+            , for nameId
+            ]
+            [ text "name" ]
+        , input
+            [ id nameId
+            , class "wheel-input left-column-input"
+            , onInput (NameChanged index)
+            , value participant.name
+            ]
+            []
+        , label
+            [ class "input-label"
+            , for jobId
+            ]
+            [ text "job" ]
+        , input
+            [ for jobId
+            , class "wheel-input"
+            , onInput (JobChanged index)
+            , value participant.job
+            ]
+            []
+        ]
 
 
-type WheelForm =
-    WheelForm
-    { description : String
-    , participants : List Participant
-    , rotationInterval : RotationInterval
-    }
+type WheelForm
+    = WheelForm
+        { description : String
+        , participants : List Participant
+        , rotationInterval : RotationInterval
+        }
 
 
 type alias RotationInterval =
@@ -201,7 +213,7 @@ changeIntervalAmount newAmount (WheelForm wheelForm) =
     in
     { wheelForm | rotationInterval = updated }
         |> WheelForm
-        
+
 
 changeIntervalUnits : TimeUnits -> WheelForm -> WheelForm
 changeIntervalUnits newUnits (WheelForm wheelForm) =
@@ -267,11 +279,6 @@ changeAt index makeChange originalList =
             originalList
 
 
-countParticipants : WheelForm -> Int
-countParticipants (WheelForm wheelForm) =
-    List.length wheelForm.participants
-
-
 maxParticipants : Int
 maxParticipants =
     20
@@ -283,11 +290,15 @@ newParticipant =
     , job = "be charming"
     }
 
+
 sizeParticipants : Int -> WheelForm -> WheelForm
 sizeParticipants size (WheelForm wheelForm) =
     let
         count =
-            size
+            if size > maxParticipants then
+                maxParticipants
+            else
+                size
 
         difference =
             count - (wheelForm.participants |> List.length)
@@ -296,7 +307,6 @@ sizeParticipants size (WheelForm wheelForm) =
             if difference > 0 then
                 List.repeat difference newParticipant
                     |> List.append wheelForm.participants
-                
             else
                 wheelForm.participants
                     |> List.take count
@@ -317,41 +327,18 @@ type alias Person =
     }
 
 
-toStaticJobViewPerson : Participant -> StaticJobView.Person
-toStaticJobViewPerson participant =
+toPerson : Participant -> Person
+toPerson participant =
     let
         job =
             if String.length participant.job > 0 then
                 Just participant.job
-
             else
                 Nothing
     in
-    StaticJobView.Person
+    Person
         participant.name
         job
-
-            
-
-
-type ValidParticipantCount
-    = ValidParticipantCount Int
-
-
-getValidParticipantCount : String -> Result String ValidParticipantCount
-getValidParticipantCount someString =
-    let
-        toValidCount : Int -> Result String ValidParticipantCount
-        toValidCount someInt =
-            if someInt > 1 && someInt <= maxParticipants then
-                someInt |> ValidParticipantCount |> Ok
-
-            else
-                Err "out of bounds"
-    in
-    someString
-        |> String.toInt
-        |> Result.andThen toValidCount
 
 
 init : ( WheelForm, Cmd Msg )
@@ -369,7 +356,8 @@ init =
         , participants = participants
         , rotationInterval = { amount = minInterval, timeUnits = Seconds }
         }
-    , Cmd.none )
+    , Cmd.none
+    )
 
 
 type Msg
@@ -527,6 +515,7 @@ encodeParticipants participants =
         |> Encode.list
 
 
+
 -- details
 
 
@@ -534,6 +523,5 @@ toMinimum : Int -> Int -> Result String Int
 toMinimum theMinimum someInt =
     if someInt >= theMinimum then
         Ok someInt
-    
     else
         Err "too small"

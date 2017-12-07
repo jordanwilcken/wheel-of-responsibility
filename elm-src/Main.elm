@@ -4,7 +4,7 @@ import Angle
 import FloatOps
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (on, onClick, onInput, targetValue)
 import JobWheel
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -23,7 +23,7 @@ view model =
     div []
         [ viewWheel model
         , hr [] []
-        , (WheelForm.view model.wheelForm) |> Html.map WheelFormMsg
+        , WheelForm.view model.wheelForm |> Html.map WheelFormMsg
         , button
             [ onClick MakeCreateCmd ]
             [ Html.text "Looks good. Make it so." ]
@@ -80,7 +80,9 @@ viewWheel model =
         [ jobsSvg
         , Html.select
             [ Html.Attributes.class "row"
-            , onInput SelectedWheelChanged
+            , on
+                "change"
+                (Decode.map SelectedWheelChanged targetValue)
             , value (selectedId |> toString)
             ]
             (viewOptionsForWheels model)
@@ -88,7 +90,8 @@ viewWheel model =
             [ Html.Attributes.id "show-realtime"
             , Html.Attributes.type_ "checkbox"
             , onClick ToggleDisplayMode
-            ] [ ]
+            ]
+            []
         , Html.label [ for "show-realtime" ] [ Html.text "display in real time" ]
         ]
 
@@ -122,9 +125,9 @@ viewOptionsForWheels model =
 wheelEntityToOptionEl : Entity JobWheel.JobWheel -> Html Msg
 wheelEntityToOptionEl (Entity id jobWheel) =
     option
-        [ value (id |> toString) ] 
+        [ value (id |> toString) ]
         [ Html.text (jobWheel |> JobWheel.describeWheel) ]
-            
+
 
 viewCurrentJobs : SvgConfig -> TimeDependentState (List JobWheel.ResponsiblePerson) -> Svg.Svg Msg
 viewCurrentJobs svgConfig timeDependentState =
@@ -221,6 +224,7 @@ viewError error =
     span [ Html.Attributes.class "error-message" ] [ textNode ]
 
 
+
 -- Model
 
 
@@ -255,10 +259,10 @@ addDistinctWheels wheels model =
             List.map justTheId model.wheels
 
         newAndDistinct =
-            List.filter (\(Entity id jobWheel) -> not <| (List.member id existingIds)) wheels
+            List.filter (\(Entity id jobWheel) -> not <| List.member id existingIds) wheels
 
         updatedWheels =
-            newAndDistinct 
+            newAndDistinct
                 |> List.append model.wheels
     in
     { model | wheels = updatedWheels }
@@ -283,7 +287,6 @@ toParticipantCountValue : String -> Result String ParticipantCountValue
 toParticipantCountValue someString =
     if someString == "" then
         Ok EmptyString
-
     else
         someString
             |> String.toInt
@@ -294,7 +297,6 @@ toMoreThanOne : Int -> Result String ParticipantCountValue
 toMoreThanOne someInt =
     if someInt > 1 then
         Ok <| MoreThanOne <| someInt
-
     else
         Err "gotta have more than one"
 
@@ -331,15 +333,15 @@ type alias JobWheelList =
 findWheel : Int -> JobWheelList -> Result String (Entity JobWheel.JobWheel)
 findWheel id wheelList =
     let
-        idsMatch : Entity (JobWheel.JobWheel) -> Bool
+        idsMatch : Entity JobWheel.JobWheel -> Bool
         idsMatch (Entity someId _) =
             someId == id
     in
     wheelList |> firstInList idsMatch
 
 
-type Entity a =
-    Entity Int a
+type Entity a
+    = Entity Int a
 
 
 getNextId : List (Entity a) -> Int
@@ -390,7 +392,7 @@ init =
             Entity 0 JobWheel.simpleWheel
 
         startingModel =
-            { wheels = [ simpleWheelEntity ] 
+            { wheels = [ simpleWheelEntity ]
             , selectedWheel = simpleWheelEntity
             , wheelOrientation = Unknown
             , currentJobs = Unknown
@@ -444,7 +446,6 @@ update msg model =
                                 Known time ->
                                     if currentTime >= time then
                                         True
-
                                     else
                                         False
 
@@ -465,9 +466,10 @@ update msg model =
                                 JobWheel.getRealTimeOrientation currentTime (model.selectedWheel |> justTheValue)
 
                     reducedTurns =
-                        Angle.inRadians angle / (2 * pi)
+                        Angle.inRadians angle
+                            / (2 * pi)
                             |> FloatOps.justTheDecimalPart
-                    
+
                     reducedDegrees =
                         reducedTurns * 360
 
@@ -491,11 +493,11 @@ update msg model =
                         |> Result.andThen (\id -> findWheel id model.wheels)
             in
             case findWheelResult of
-                Ok wheel -> 
+                Ok wheel ->
                     ( model, Cmd.none )
                         |> Return.map (changeSelectedWheel wheel)
 
-                Err _->
+                Err _ ->
                     ( model, Cmd.none )
 
         WheelFormMsg wheelFormMsg ->
@@ -513,7 +515,7 @@ update msg model =
                         Err error ->
                             Debug.log "create wheel error: " error
                                 |> ErrorCreatingJobWheel
-                
+
                 makeJobWheel time =
                     case JobWheel.makeJobWheel time (WheelForm.getFormData model.wheelForm) of
                         Ok jobWheel ->
@@ -524,7 +526,7 @@ update msg model =
 
                 creationTask =
                     Time.now
-                        |> Task.andThen makeJobWheel 
+                        |> Task.andThen makeJobWheel
             in
             ( model, Cmd.none )
                 |> Return.map (\theModel -> { theModel | error = Nothing })
@@ -584,6 +586,7 @@ wheelsDecoder =
             JobWheel.jobWheelDecoder
 
 
+
 -- main
 
 
@@ -612,7 +615,6 @@ firstInList checkMatch someList =
         Just item ->
             if checkMatch item then
                 Ok item
-
             else
                 firstInList checkMatch (List.drop 1 someList)
 
@@ -624,7 +626,6 @@ toZeroOrGreater : Int -> Result () Int
 toZeroOrGreater someInt =
     if someInt >= 0 then
         Ok someInt
-
     else
         Err ()
 
@@ -637,9 +638,14 @@ sortDescending someList =
 
 flippedComparison a b =
     case compare a b of
-    LT -> GT
-    EQ -> EQ
-    GT -> LT
+        LT ->
+            GT
+
+        EQ ->
+            EQ
+
+        GT ->
+            LT
 
 
 type alias Person =
