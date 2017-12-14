@@ -31,6 +31,14 @@ view model =
         ]
 
 
+type alias SvgConfig =
+    { class : String
+    , fontSize : String
+    , width : Int
+    , height : Int
+    }
+
+
 svgConfig : SvgConfig
 svgConfig =
     { class = "wheel-view"
@@ -47,34 +55,7 @@ viewWheel model =
             identity model.selectedWheel
 
         jobsSvg =
-            case model.displayMode of
-                RealTime ->
-                    case model.wheelOrientation of
-                        Known wheelOrientation ->
-                            let
-                                wheelView =
-                                    WheelView.viewAsClock
-                                        svgConfig
-                                        ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
-                            in
-                            wheelView |> Html.map (always WheelViewMsg)
-
-                        Unknown ->
-                            viewLoading svgConfig
-
-                Static ->
-                    case model.wheelOrientation of
-                        Known wheelOrientation ->
-                            let
-                                wheelView =
-                                    WheelView.viewWheel
-                                        svgConfig
-                                        ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
-                            in
-                            wheelView |> Html.map (always WheelViewMsg)
-
-                        Unknown ->
-                            viewLoading svgConfig
+            viewJobs model.displayMode model.wheelOrientation
     in
     div []
         [ jobsSvg
@@ -94,6 +75,31 @@ viewWheel model =
             []
         , Html.label [ for "show-realtime" ] [ Html.text "display in real time" ]
         ]
+
+
+viewJobs : DisplayMode -> TimeDependentState WheelOrientation -> Html Msg
+viewJobs displayMode wheelOrientation =
+    let
+        viewFunction =
+            case displayMode of
+                RealTime ->
+                    WheelView.viewAsClock
+
+                Static ->
+                    WheelView.viewWheel
+    in
+    case wheelOrientation of
+        Known wheelOrientation ->
+            let
+                wheelView =
+                    viewFunction
+                        svgConfig
+                        ( wheelOrientation.personList, Angle.fromDegrees wheelOrientation.angleInDegrees )
+            in
+            wheelView |> Html.map (always WheelViewMsg)
+
+        Unknown ->
+            viewLoading svgConfig
 
 
 viewLoading : SvgConfig -> Html Msg
@@ -127,87 +133,6 @@ wheelEntityToOptionEl (Entity id jobWheel) =
     option
         [ value (id |> toString) ]
         [ Html.text (jobWheel |> JobWheel.describeWheel) ]
-
-
-viewCurrentJobs : SvgConfig -> TimeDependentState (List JobWheel.ResponsiblePerson) -> Svg.Svg Msg
-viewCurrentJobs svgConfig timeDependentState =
-    case timeDependentState of
-        Known responsiblePeople ->
-            let
-                personX =
-                    "50"
-
-                responsibilityX =
-                    150
-
-                peopleCount =
-                    List.length <| responsiblePeople
-
-                yPositions =
-                    getPositions peopleCount svgConfig.height
-
-                concatTextElements : ( Int, JobWheel.ResponsiblePerson ) -> List (Svg.Svg Msg) -> List (Svg.Svg Msg)
-                concatTextElements ( yValue, person ) svgList =
-                    let
-                        personTextElement =
-                            text_
-                                [ x personX
-                                , y <| toString <| yValue
-                                ]
-                                [ Svg.text person.name ]
-
-                        maybeJobTextElement =
-                            Maybe.map (viewJob responsibilityX yValue) person.job
-
-                        toAppend =
-                            case maybeJobTextElement of
-                                Just jobTextElement ->
-                                    [ personTextElement, jobTextElement ]
-
-                                Nothing ->
-                                    [ personTextElement ]
-                    in
-                    List.append svgList toAppend
-
-                textElements =
-                    responsiblePeople
-                        |> List.map2 (,) yPositions
-                        |> List.foldl concatTextElements []
-            in
-            svg
-                [ svgConfig.width |> toString |> Svg.Attributes.width
-                , svgConfig.height |> toString |> Svg.Attributes.height
-                ]
-                textElements
-
-        Unknown ->
-            svg
-                [ svgConfig.width |> toString |> Svg.Attributes.width
-                , svgConfig.height |> toString |> Svg.Attributes.height
-                ]
-                [ text_
-                    [ x "100"
-                    , y "100"
-                    ]
-                    [ Svg.text "I don't know who is doing what right now." ]
-                ]
-
-
-type alias SvgConfig =
-    { class : String
-    , fontSize : String
-    , width : Int
-    , height : Int
-    }
-
-
-viewJob : Int -> Int -> JobWheel.Job -> Svg.Svg Msg
-viewJob xVal yVal job =
-    text_
-        [ x <| toString <| xVal
-        , y <| toString <| yVal
-        ]
-        [ Svg.text job.description ]
 
 
 viewError : Maybe String -> Html Msg
@@ -247,6 +172,12 @@ type alias WheelOrientation =
     }
 
 
+type alias Person =
+    { name : String
+    , job : Maybe String
+    }
+
+
 changeWheelOrientation : WheelOrientation -> Model -> Model
 changeWheelOrientation orientation model =
     { model | wheelOrientation = Known orientation }
@@ -278,45 +209,6 @@ type DisplayMode
     | Static
 
 
-type ParticipantCountValue
-    = EmptyString
-    | MoreThanOne Int
-
-
-toParticipantCountValue : String -> Result String ParticipantCountValue
-toParticipantCountValue someString =
-    if someString == "" then
-        Ok EmptyString
-    else
-        someString
-            |> String.toInt
-            |> Result.andThen toMoreThanOne
-
-
-toMoreThanOne : Int -> Result String ParticipantCountValue
-toMoreThanOne someInt =
-    if someInt > 1 then
-        Ok <| MoreThanOne <| someInt
-    else
-        Err "gotta have more than one"
-
-
-countValueToString : ParticipantCountValue -> String
-countValueToString countValue =
-    case countValue of
-        MoreThanOne value ->
-            value |> toString
-
-        EmptyString ->
-            Debug.log "empty string is interesting" ""
-
-
-type alias Participant =
-    { name : String
-    , job : String
-    }
-
-
 changeSelectedWheel : Entity JobWheel.JobWheel -> Model -> Model
 changeSelectedWheel newlySelected model =
     { model
@@ -342,16 +234,6 @@ findWheel id wheelList =
 
 type Entity a
     = Entity Int a
-
-
-getNextId : List (Entity a) -> Int
-getNextId entities =
-    case List.head <| sortDescending <| List.map justTheId entities of
-        Just anId ->
-            anId + 1
-
-        Nothing ->
-            1
 
 
 justTheValue : Entity a -> a
@@ -437,33 +319,10 @@ update msg model =
             ( { model | displayMode = newDisplayMode }, Cmd.none )
 
         TimeReceived currentTime ->
-            let
-                timeForAChange : Bool
-                timeForAChange =
-                    case model.displayMode of
-                        Static ->
-                            case model.timeOfNextChange of
-                                Known time ->
-                                    if currentTime >= time then
-                                        True
-                                    else
-                                        False
-
-                                Unknown ->
-                                    True
-
-                        RealTime ->
-                            True
-            in
-            if timeForAChange then
+            if timeToChange currentTime model.timeOfNextChange model.displayMode then
                 let
                     ( personList, angle ) =
-                        case model.displayMode of
-                            Static ->
-                                JobWheel.getStaticOrientation currentTime (model.selectedWheel |> justTheValue)
-
-                            RealTime ->
-                                JobWheel.getRealTimeOrientation currentTime (model.selectedWheel |> justTheValue)
+                        getOrientation model.displayMode currentTime (model.selectedWheel |> justTheValue)
 
                     reducedTurns =
                         Angle.inRadians angle
@@ -555,6 +414,24 @@ update msg model =
             ( model, Cmd.none )
 
 
+timeToChange : Time.Time -> TimeDependentState Time.Time -> DisplayMode -> Bool
+timeToChange currentTime appointedTime displayMode =
+    case displayMode of
+        Static ->
+            case appointedTime of
+                Known time ->
+                    if currentTime >= time then
+                        True
+                    else
+                        False
+
+                Unknown ->
+                    True
+
+        RealTime ->
+            True
+
+
 
 -- subscriptions
 
@@ -599,16 +476,6 @@ main =
 -- details
 
 
-getPositions : Int -> Int -> List Int
-getPositions howMany availableSpace =
-    let
-        offset =
-            availableSpace // (howMany + 1)
-    in
-    List.range 1 howMany
-        |> List.map (\index -> index * offset)
-
-
 firstInList : (a -> Bool) -> List a -> Result String a
 firstInList checkMatch someList =
     case List.head someList of
@@ -622,33 +489,15 @@ firstInList checkMatch someList =
             Err ""
 
 
-toZeroOrGreater : Int -> Result () Int
-toZeroOrGreater someInt =
-    if someInt >= 0 then
-        Ok someInt
-    else
-        Err ()
+getOrientation : DisplayMode -> Time.Time -> JobWheel.JobWheel -> ( List Person, Angle.AngleOfRotation )
+getOrientation displayMode time jobWheel =
+    let
+        orientationFunction =
+            case displayMode of
+                Static ->
+                    JobWheel.getStaticOrientation
 
-
-sortDescending : List comparable -> List comparable
-sortDescending someList =
-    someList
-        |> List.sortWith flippedComparison
-
-
-flippedComparison a b =
-    case compare a b of
-        LT ->
-            GT
-
-        EQ ->
-            EQ
-
-        GT ->
-            LT
-
-
-type alias Person =
-    { name : String
-    , job : Maybe String
-    }
+                RealTime ->
+                    JobWheel.getRealTimeOrientation
+    in
+    orientationFunction time jobWheel

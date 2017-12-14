@@ -61,47 +61,47 @@ view (WheelForm wheelForm) =
 viewTimeUnitSelect : Html Msg
 viewTimeUnitSelect =
     div
-      [ class "row" ]
-      [ span
-          [ class "input-label" ]
-          [ text "How often should participants rotate jobs?" ]
-      , span []
-          [ label
-              [ class "input-label"
-              , for "rotation-interval"
-              ]
-              [ text "every" ]
-          , input
-              [ id "rotation-interval"
-              , attribute "max" "100"
-              , attribute "min" (minInterval |> toString)
-              , type_ "number"
-              , onInput intervalStringToMsg
-              ]
-              []
-          , select
-              [ on
-                  "change"
-                  (Decode.map unitStringToMsg targetValue)
-              ]
-              [ option
-                  [ value "seconds" ]
-                  [ text "seconds" ]
-              , option
-                  [ value "minutes" ]
-                  [ text "minutes" ]
-              , option
-                  [ value "hours" ]
-                  [ text "hours" ]
-              , option
-                  [ value "days" ]
-                  [ text "days" ]
-              , option
-                  [ value "weeks" ]
-                  [ text "weeks" ]
-              ]
-          ]
-      ]
+        [ class "row" ]
+        [ span
+            [ class "input-label" ]
+            [ text "How often should participants rotate jobs?" ]
+        , span []
+            [ label
+                [ class "input-label"
+                , for "rotation-interval"
+                ]
+                [ text "every" ]
+            , input
+                [ id "rotation-interval"
+                , attribute "max" "100"
+                , attribute "min" (minInterval |> toString)
+                , type_ "number"
+                , onInput intervalStringToMsg
+                ]
+                []
+            , select
+                [ on
+                    "change"
+                    (Decode.map unitStringToMsg targetValue)
+                ]
+                [ option
+                    [ value "seconds" ]
+                    [ text "seconds" ]
+                , option
+                    [ value "minutes" ]
+                    [ text "minutes" ]
+                , option
+                    [ value "hours" ]
+                    [ text "hours" ]
+                , option
+                    [ value "days" ]
+                    [ text "days" ]
+                , option
+                    [ value "weeks" ]
+                    [ text "weeks" ]
+                ]
+            ]
+        ]
 
 
 viewPreview : WheelView.SvgConfig -> List Participant -> Html Msg

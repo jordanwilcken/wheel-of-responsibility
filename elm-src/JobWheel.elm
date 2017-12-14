@@ -1,7 +1,6 @@
 module JobWheel
     exposing
-        ( Job
-        , JobWheel
+        ( JobWheel
         , ResponsiblePerson
         , describeWheel
         , determineJobsAt
@@ -24,23 +23,26 @@ import Time
 
 getRealTimeOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Angle.AngleOfRotation )
 getRealTimeOrientation time jobWheel =
-    case jobWheel of
-        JobWheel stuff ->
-            ( stuff.origin |> listThem, angleOfRotation time jobWheel )
+    getOrientation (angleOfRotation time jobWheel) jobWheel
 
 
 getStaticOrientation : Time.Time -> JobWheel -> ( List { name : String, job : Maybe String }, Angle.AngleOfRotation )
 getStaticOrientation time jobWheel =
     let
+        angle : Angle.AngleOfRotation
         angle =
             changesThisTurn time jobWheel
                 |> floor
                 |> toFloat
                 |> (*) (rotationPerChange jobWheel |> Angle.inRadians)
+                |> Angle.fromRadians
     in
-    case jobWheel of
-        JobWheel record ->
-            ( record.origin |> listThem, angle |> Angle.fromRadians )
+    getOrientation angle jobWheel
+
+
+getOrientation : Angle.AngleOfRotation -> JobWheel -> ( List { name : String, job : Maybe String }, Angle.AngleOfRotation )
+getOrientation angle (JobWheel jobWheel) =
+    ( jobWheel.origin |> toNamesAndJobs, angle )
 
 
 simpleWheel : JobWheel
@@ -81,13 +83,13 @@ type alias FormData =
 
 simplePeople : ResponsiblePeople
 simplePeople =
-    { first = ResponsiblePerson 1 "This" (Just (Job 1 "the participants"))
+    { first = ResponsiblePerson "This" (Just (Job "the participants"))
     , middle =
-        [ ResponsiblePerson 2 "is" (Just (Job 1 "change jobs"))
-        , ResponsiblePerson 3 "a" (Just (Job 1 "every"))
-        , ResponsiblePerson 4 "job" (Just (Job 1 "5"))
+        [ ResponsiblePerson "is" (Just (Job "change jobs"))
+        , ResponsiblePerson "a" (Just (Job "every"))
+        , ResponsiblePerson "job" (Just (Job "5"))
         ]
-    , last = ResponsiblePerson 5 "wheel" (Just (Job 2 "seconds"))
+    , last = ResponsiblePerson "wheel" (Just (Job "seconds"))
     }
 
 
@@ -206,9 +208,8 @@ rotateJobsNTimes n responsiblePeople =
                 |> List.map .job
                 |> shiftList positiveN
     in
-    List.map3
+    List.map2
         ResponsiblePerson
-        (List.map .id startingList)
         (List.map .name startingList)
         rotatedJobs
 
@@ -240,12 +241,15 @@ listPeople people =
     people.first :: List.append people.middle [ people.last ]
 
 
-listThem : ResponsiblePeople -> List { name : String, job : Maybe String }
-listThem responsiblePeople =
+toNamesAndJobs : ResponsiblePeople -> List { name : String, job : Maybe String }
+toNamesAndJobs responsiblePeople =
+    let
+        mapToRecords =
+            List.map (\person -> { name = person.name, job = Maybe.map .description person.job })
+    in
     responsiblePeople
         |> listPeople
-        |> List.map
-            (\person -> { name = person.name, job = Maybe.map .description person.job })
+        |> mapToRecords
 
 
 type Direction
@@ -365,7 +369,7 @@ originDecoder =
 responsiblePersonDecoder : Decode.Decoder ResponsiblePerson
 responsiblePersonDecoder =
     Decode.map2
-        (ResponsiblePerson 42)
+        ResponsiblePerson
         (Decode.field "name" Decode.string)
         (Decode.field "job" jobDecoder)
 
@@ -376,7 +380,7 @@ jobDecoder =
         stringToJob : String -> Maybe Job
         stringToJob someString =
             if String.length someString > 0 then
-                Just <| Job 42 someString
+                Just <| Job someString
             else
                 Nothing
     in
@@ -422,16 +426,6 @@ toResponsiblePeople personList =
 getResponsiblePeople : List { name : String, job : String } -> Result String ResponsiblePeople
 getResponsiblePeople participants =
     let
-        --toResponsibleList : List (Result String ResponsiblePerson) -> Result String (List ResponsiblePerson)
-        --toResponsibleList results =
-        --    let
-        --        persons =
-        --            results |> List.filterMap Result.toMaybe
-        --    in
-        --    if (List.length persons) == (List.length results) then
-        --        Ok persons
-        --    else
-        --        Err
         toResponsibleList : List (Result String ResponsiblePerson) -> Result String (List ResponsiblePerson)
         toResponsibleList results =
             case List.head results of
@@ -465,9 +459,9 @@ toResponsiblePerson record =
             if allWhitespace record.job then
                 Nothing
             else
-                Just (Job 42 record.job)
+                Just (Job record.job)
     in
-    name |> Result.map (\theName -> ResponsiblePerson 42 theName job)
+    name |> Result.map (\theName -> ResponsiblePerson theName job)
 
 
 allWhitespace : String -> Bool
@@ -486,26 +480,23 @@ countPeople people =
 
 
 type alias Person =
-    { id : Int
-    , name : String
+    { name : String
     }
 
 
 type alias ResponsiblePerson =
-    { id : Int
-    , name : String
+    { name : String
     , job : Maybe Job
     }
 
 
 toPerson : ResponsiblePerson -> Person
 toPerson responsiblePerson =
-    Person responsiblePerson.id responsiblePerson.name
+    Person responsiblePerson.name
 
 
 type alias Job =
-    { id : Int
-    , description : String
+    { description : String
     }
 
 
